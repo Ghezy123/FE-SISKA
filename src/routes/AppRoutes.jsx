@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import StokPage from '../pages/stok/StokPage';
 import { useAuth } from '../hooks/useAuth';
 import { MainLayout } from '../layouts/MainLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -49,12 +50,7 @@ export const AppRoutes = () => {
       case 'kasir':
         return <KasirPage />;
       case 'stok':
-        return (
-          <div style={{ padding: '32px', fontFamily: 'Inter, sans-serif' }}>
-            <h1 style={{ fontSize: '26px', fontWeight: '700', marginBottom: '8px' }}>Modul Stok</h1>
-            <p style={{ color: '#6b7280' }}>Manajemen inventori barang dan update harga.</p>
-          </div>
-        );
+        return <StokPage />;
       case 'laporan':
         return (
           <div style={{ padding: '32px', fontFamily: 'Inter, sans-serif' }}>

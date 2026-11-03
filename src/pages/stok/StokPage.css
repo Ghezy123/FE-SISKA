@@ -1,0 +1,354 @@
+/* ─────────────────────────────────────────────────────────
+   StokPage.css  –  matches Figma frame 6:4772 exactly
+   Background: #F3F4F6 (rgb 243 244 246)
+   Card: white, border #E5E7EB, radius 14px
+   ───────────────────────────────────────────────────────── */
+
+.stok-page {
+  flex: 1;
+  min-height: 100%;
+  background: #f3f4f6;
+  padding: 32px 28px;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* ─── Header ─── */
+.stok-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.stok-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stok-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stok-title {
+  font-size: 28px;
+  font-weight: 400;
+  color: #111827;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.stok-subtitle {
+  font-size: 15px;
+  font-weight: 400;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ─── "Barang Baru" button ─── */
+.btn-tambah {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: 46px;
+  background: #2563eb;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.btn-tambah:hover { background: #1d4ed8; }
+
+/* ─── Toolbar ─── */
+.stok-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Search */
+.stok-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 500px;
+  height: 54px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0 14px;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #111827;
+  background: transparent;
+}
+
+.search-input::placeholder { color: #9ca3af; }
+
+.search-kbd {
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  color: #9ca3af;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+/* Category dropdown */
+.stok-kategori-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.kategori-select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 42px;
+  padding: 0 36px 0 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  outline: none;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: #111827;
+}
+
+/* ─── Table card ─── */
+.stok-table-wrapper {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.stok-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+/* Header row */
+.stok-table thead tr {
+  background: #f9fafb;
+}
+
+.stok-table thead th {
+  padding: 14px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  text-align: left;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+/* Body rows */
+.stok-table tbody tr {
+  border-bottom: 1px solid #f0f1f3;
+  transition: background 0.12s;
+}
+
+.stok-table tbody tr:last-child { border-bottom: none; }
+.stok-table tbody tr:hover { background: #f9fafb; }
+
+.stok-table tbody td {
+  padding: 0 16px;
+  height: 68px;
+  font-size: 12px;
+  color: #374151;
+  vertical-align: middle;
+}
+
+/* Kode column – monospace, muted */
+.cell-kode {
+  font-family: 'Cousine', 'Consolas', monospace !important;
+  font-size: 12px !important;
+  color: #6b7280 !important;
+}
+
+/* Nama column – bold, dark */
+.cell-nama {
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+/* Harga Beli – muted */
+.cell-harga-beli { color: #6b7280 !important; }
+
+/* Harga Jual – bold dark */
+.cell-harga-jual {
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+/* Kategori badge */
+.kategori-badge {
+  display: inline-block;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Stok badge – colored by quantity */
+.stok-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Aksi buttons */
+.aksi-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-update,
+.btn-hapus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 7px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.btn-update {
+  color: #2563eb;
+}
+.btn-update:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.btn-hapus {
+  color: #dc2626;
+}
+.btn-hapus:hover {
+  background: #fff1f2;
+  border-color: #fecaca;
+}
+
+/* Empty state */
+.empty-row {
+  text-align: center !important;
+  color: #9ca3af !important;
+  font-size: 14px !important;
+  padding: 40px 0 !important;
+}
+
+/* ─── Pagination ─── */
+.stok-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.page-btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
