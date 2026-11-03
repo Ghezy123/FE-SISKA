@@ -23,13 +23,16 @@ const StokPage = () => {
   const [modalUpdateStok, setModalUpdateStok] = useState(null);  // product | null
   const [modalHapus, setModalHapus] = useState(null);            // product | null
 
-  useEffect(() => {
-    setProducts(productService.getProducts());
-  }, []);
-
   const refresh = () => {
     setProducts(productService.getProducts());
   };
+
+  useEffect(() => {
+    refresh();
+    const handleUpdate = () => refresh();
+    window.addEventListener('siska_products_updated', handleUpdate);
+    return () => window.removeEventListener('siska_products_updated', handleUpdate);
+  }, []);
 
   /* ──────────── Filtering & Pagination ──────────── */
   const kategoriList = useMemo(

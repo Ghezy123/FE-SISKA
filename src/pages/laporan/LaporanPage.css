@@ -1,0 +1,394 @@
+/* ─────────────────────────────────────────────────────────
+   LaporanPage.css  — matches Figma frame 6:7152
+   ───────────────────────────────────────────────────────── */
+
+.laporan-page {
+  flex: 1;
+  min-height: 100%;
+  background: #f3f4f6;
+  padding: 32px 28px;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* ─── Header ─── */
+.lap-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lap-header-left { display: flex; flex-direction: column; gap: 2px; }
+
+.lap-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lap-title {
+  font-size: 28px;
+  font-weight: 400;
+  color: #111827;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.lap-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ─── Periode dropdown ─── */
+.lap-periode-wrap { position: relative; flex-shrink: 0; }
+
+.lap-periode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 58px;
+  padding: 0 18px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s;
+}
+.lap-periode-btn:hover { border-color: #d1d5db; }
+
+.lap-periode-btn > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.lap-periode-label {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.lap-periode-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.lap-periode-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 50;
+  min-width: 180px;
+}
+
+.lap-periode-option {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.lap-periode-option:hover { background: #f3f4f6; }
+.lap-periode-option.active { color: #2563eb; font-weight: 700; background: #eff6ff; }
+
+/* ─── Stat cards ─── */
+.lap-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.lap-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 20px;
+}
+
+.lap-stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lap-stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lap-stat-label {
+  font-size: 11px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+.lap-stat-value {
+  font-size: 23px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.lap-stat-growth {
+  font-size: 10px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* ─── Chart card ─── */
+.lap-chart-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lap-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.lap-chart-title {
+  font-size: 17px;
+  font-weight: 400;
+  color: #111827;
+  margin: 0;
+}
+
+.lap-chart-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.lap-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lap-chart-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+  display: inline-block;
+}
+
+.lap-chart-legend-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Chart body layout: y-labels + svg */
+.lap-chart-body {
+  display: flex;
+  gap: 4px;
+  height: 240px;
+}
+
+.lap-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 28px;  /* space for x-axis */
+  min-width: 36px;
+  text-align: right;
+}
+
+.lap-y-label {
+  font-size: 9px;
+  color: #9ca3af;
+  line-height: 1;
+}
+
+.lap-svg-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lap-svg-wrap svg {
+  flex: 1;
+  display: block;
+}
+
+.lap-x-axis {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0 0;
+  height: 20px;
+}
+
+.lap-x-label {
+  font-size: 9px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* ─── Riwayat Transaksi card ─── */
+.lap-riwayat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.lap-riwayat-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+}
+
+.lap-riwayat-title {
+  font-size: 17px;
+  font-weight: 400;
+  color: #111827;
+  margin: 0;
+}
+
+.lap-riwayat-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.btn-lihat-semua {
+  height: 38px;
+  padding: 0 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+.btn-lihat-semua:hover { background: #f9fafb; }
+
+/* ─── Table ─── */
+.lap-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lap-table thead tr {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.lap-table thead th {
+  padding: 12px 20px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  text-align: left;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.lap-table tbody tr {
+  border-bottom: 1px solid #f0f1f3;
+  transition: background 0.1s;
+}
+.lap-table tbody tr:last-child { border-bottom: none; }
+.lap-table tbody tr:hover { background: #f9fafb; }
+
+.lap-table tbody td {
+  padding: 0 20px;
+  height: 60px;
+  font-size: 12px;
+  color: #4b5563;
+  vertical-align: middle;
+}
+
+.lap-cell-id {
+  font-weight: 700 !important;
+  color: #2563eb !important;
+}
+
+.lap-cell-waktu .lap-waktu-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lap-cell-total {
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+/* Detail button */
+.btn-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 38px;
+  padding: 0 14px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-detail:hover { background: #eff6ff; }
+
+/* Empty */
+.lap-empty {
+  text-align: center !important;
+  color: #9ca3af !important;
+  padding: 40px 0 !important;
+  font-size: 14px !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .lap-stats-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .lap-stats-grid { grid-template-columns: 1fr; }
+  .laporan-page { padding: 20px 16px; }
+}
+

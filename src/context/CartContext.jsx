@@ -1,29 +1,55 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { productService } from '../services/productService';
 
 const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
-  // Initial cart dengan 2 item persis seperti di Frame 6:78 Figma
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 'prd_02',
-      nama: 'Pena Standard AE7',
-      kategori: 'Alat Tulis',
-      harga: 3000,
-      stok: 4,
-      quantity: 2,
-    },
-    {
-      id: 'prd_03',
-      nama: 'Buku Tulis 38 Lembar',
-      kategori: 'Buku',
-      harga: 5000,
-      stok: 24,
-      quantity: 1,
-    },
-  ]);
+  // Simpan keranjang di localStorage agar tidak hilang saat berpindah antar modul
+  const [cartItems, setCartItems] = useState(() => {
+    const saved = localStorage.getItem('siska_cart');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // fallback
+      }
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('siska_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Sinkronisasi data barang di keranjang jika ada perubahan harga/stok dari modul Stok
+  useEffect(() => {
+    const syncWithProducts = () => {
+      const products = productService.getProducts();
+      setCartItems((prevItems) => {
+        return prevItems.map((item) => {
+          const fresh = products.find((p) => p.id === item.id);
+          if (fresh) {
+            return {
+              ...item,
+              nama: fresh.nama,
+              kategori: fresh.kategori,
+              harga: fresh.harga,
+              stok: fresh.stok,
+              quantity: Math.min(item.quantity, fresh.stok > 0 ? fresh.stok : 1),
+            };
+          }
+          return item;
+        });
+      });
+    };
+
+    window.addEventListener('siska_products_updated', syncWithProducts);
+    return () => window.removeEventListener('siska_products_updated', syncWithProducts);
+  }, []);
 
   const addToCart = (product) => {
+    if (product.stok <= 0) return;
+
     setCartItems((prevItems) => {
       const existing = prevItems.find((item) => item.id === product.id);
       if (existing) {
@@ -60,6 +86,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('siska_cart');
   };
 
   const totalAmount = cartItems.reduce(
@@ -93,4 +120,3 @@ export const useCart = () => {
   }
   return context;
 };
-

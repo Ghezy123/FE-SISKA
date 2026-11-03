@@ -106,5 +106,23 @@ export const productService = {
 
   saveProducts: (products) => {
     localStorage.setItem('siska_products', JSON.stringify(products));
+    window.dispatchEvent(new Event('siska_products_updated'));
+  },
+
+  // Kurangi stok saat checkout transaksi di Kasir
+  kurangiStok: (cartItems) => {
+    const current = productService.getProducts();
+    const updated = current.map((p) => {
+      const itemDibeli = cartItems.find((c) => c.id === p.id);
+      if (itemDibeli) {
+        return {
+          ...p,
+          stok: Math.max(0, p.stok - itemDibeli.quantity),
+        };
+      }
+      return p;
+    });
+    productService.saveProducts(updated);
+    return updated;
   },
 };

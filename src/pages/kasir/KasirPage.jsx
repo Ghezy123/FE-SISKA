@@ -1,27 +1,40 @@
-import { useState, useMemo } from 'react';
-import { initialProducts } from '../../services/productService';
+import { useState, useMemo, useEffect } from 'react';
+import { productService } from '../../services/productService';
 import { useCart } from '../../context/CartContext';
 import { formatRupiah } from '../../utils/helpers';
 import './KasirPage.css';
 
 export const KasirPage = () => {
+  const [products, setProducts] = useState([]);
   const [activeTab, setActiveTab] = useState('atk'); // 'atk' | 'cetak'
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
   const [searchQuery, setSearchQuery] = useState('');
   const { addToCart, cartItems } = useCart();
 
-  // Daftar Kategori Unik
+  // Load produk dari productService dan pasang listener update real-time
+  const loadProducts = () => {
+    setProducts(productService.getProducts());
+  };
+
+  useEffect(() => {
+    loadProducts();
+    const handleUpdate = () => loadProducts();
+    window.addEventListener('siska_products_updated', handleUpdate);
+    return () => window.removeEventListener('siska_products_updated', handleUpdate);
+  }, []);
+
+  // Daftar Kategori Unik dari data produk aktif
   const categories = useMemo(() => {
     const list = ['Semua Kategori'];
-    initialProducts.forEach((p) => {
-      if (!list.includes(p.kategori)) list.push(p.kategori);
+    products.forEach((p) => {
+      if (p.kategori && !list.includes(p.kategori)) list.push(p.kategori);
     });
     return list;
-  }, []);
+  }, [products]);
 
   // Filter Produk Berdasarkan Pencarian & Kategori
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter((item) => {
+    return products.filter((item) => {
       const matchCat =
         selectedCategory === 'Semua Kategori' ||
         item.kategori.toLowerCase() === selectedCategory.toLowerCase();
@@ -30,7 +43,7 @@ export const KasirPage = () => {
         item.kode.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCat && matchQuery;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery]);
 
   // Tanggal Hari Ini Sesuai Format Lokal
   const todayFormatted = useMemo(() => {
@@ -143,20 +156,32 @@ export const KasirPage = () => {
           <div className="siska-products-grid">
             {filteredProducts.map((product) => {
               const inCart = cartItems.find((i) => i.id === product.id);
-              const isLowStock = product.stok <= 5;
+              const isOutOfStock = product.stok <= 0;
+              const isLowStock = product.stok > 0 && product.stok <= 5;
+              const isMaxInCart = inCart && inCart.quantity >= product.stok;
 
               return (
                 <div
                   key={product.id}
-                  className={`siska-product-card ${inCart ? 'in-cart' : ''}`}
-                  onClick={() => addToCart(product)}
+                  className={`siska-product-card ${inCart ? 'in-cart' : ''} ${isOutOfStock ? 'disabled' : ''}`}
+                  onClick={() => {
+                    if (!isOutOfStock && !isMaxInCart) addToCart(product);
+                  }}
+                  style={{
+                    opacity: isOutOfStock ? 0.6 : 1,
+                    cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
+                  }}
                 >
                   <div className="siska-card-top">
                     <span className="siska-product-cat">{product.kategori}</span>
                     <span
-                      className={`siska-product-stock ${isLowStock ? 'low' : ''}`}
+                      className={`siska-product-stock ${isOutOfStock ? 'empty' : isLowStock ? 'low' : ''}`}
+                      style={{
+                        background: isOutOfStock ? '#fee2e2' : undefined,
+                        color: isOutOfStock ? '#dc2626' : undefined,
+                      }}
                     >
-                      Stok {product.stok}
+                      {isOutOfStock ? 'Habis' : `Stok ${product.stok}`}
                     </span>
                   </div>
 
@@ -169,11 +194,16 @@ export const KasirPage = () => {
                     <button
                       type="button"
                       className="siska-add-btn"
+                      disabled={isOutOfStock || isMaxInCart}
                       onClick={(e) => {
                         e.stopPropagation();
-                        addToCart(product);
+                        if (!isOutOfStock && !isMaxInCart) addToCart(product);
                       }}
-                      title="Tambah ke keranjang"
+                      title={isOutOfStock ? 'Stok habis' : isMaxInCart ? 'Maksimal stok tercapai' : 'Tambah ke keranjang'}
+                      style={{
+                        opacity: isOutOfStock || isMaxInCart ? 0.5 : 1,
+                        cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
+                      }}
                     >
                       {inCart ? (
                         <span className="siska-incart-badge">{inCart.quantity}</span>
@@ -203,7 +233,7 @@ export const KasirPage = () => {
                   nama: 'Print Dokumen Hitam Putih (A4)',
                   kategori: 'Jasa Cetak',
                   harga: 500,
-                  stok: 999,
+                  stok: 9999,
                 })
               }
             >
@@ -220,7 +250,7 @@ export const KasirPage = () => {
                   nama: 'Print Warna (A4)',
                   kategori: 'Jasa Cetak',
                   harga: 1500,
-                  stok: 999,
+                  stok: 9999,
                 })
               }
             >
@@ -237,7 +267,7 @@ export const KasirPage = () => {
                   nama: 'Jilid Spiral Plastik + Cover',
                   kategori: 'Jilid & Finishing',
                   harga: 7000,
-                  stok: 999,
+                  stok: 9999,
                 })
               }
             >
@@ -251,4 +281,3 @@ export const KasirPage = () => {
     </div>
   );
 };
-
