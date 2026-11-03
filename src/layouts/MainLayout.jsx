@@ -1,22 +1,29 @@
 import { useState } from 'react';
-import { Navbar } from '../components/common/Navbar';
 import { Sidebar } from '../components/common/Sidebar';
+import { CartSidebar } from '../components/kasir/CartSidebar';
+import './MainLayout.css';
 
-export const MainLayout = ({ activePage, onNavigate, children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+export const MainLayout = ({ activePage, onNavigate, onCheckout, children }) => {
+  const [sidebarOpen] = useState(true);
 
   return (
-    <div className="siska-layout-container">
+    <div className="siska-pos-shell">
+      {/* Kolom 1: Navigasi Sidebar */}
       <Sidebar
         activePage={activePage}
         onNavigate={onNavigate}
         isOpen={sidebarOpen}
       />
-      <div className={`siska-main-content ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
-        <Navbar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
-        <main className="siska-content-body">{children}</main>
-      </div>
+
+      {/* Kolom 2: Konten Halaman */}
+      <main className="siska-pos-center">
+        {children}
+      </main>
+
+      {/* Kolom 3: Keranjang Sidebar (Tampil di menu Kasir) */}
+      {activePage === 'kasir' && (
+        <CartSidebar onCheckout={onCheckout} />
+      )}
     </div>
   );
 };
-

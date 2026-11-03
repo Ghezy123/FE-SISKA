@@ -8,7 +8,7 @@ export const authService = {
     if (credentials.username && credentials.password) {
       const mockUser = {
         id: 'usr_01',
-        nama: 'Ghezy Administrator',
+        nama: 'Kasir SISKA',
         username: credentials.username,
         role: 'admin',
         token: 'mock-jwt-token-siska-2026',

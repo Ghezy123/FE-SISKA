@@ -1,0 +1,180 @@
+/* Sidebar Style Matching Frame 6:78 */
+
+.siska-sidebar-v2 {
+  width: 240px;
+  min-width: 240px;
+  background-color: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 18px;
+  box-sizing: border-box;
+  z-index: 30;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Brand */
+.siska-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.siska-brand-icon {
+  width: 42px;
+  height: 42px;
+  background: #2563eb;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.siska-brand-name {
+  font-size: 21px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.5px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.siska-brand-desc {
+  font-size: 11px;
+  color: #6b7280;
+  display: block;
+}
+
+/* Nav */
+.siska-nav-section {
+  flex: 1;
+  padding-top: 24px;
+}
+
+.siska-section-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  padding-left: 8px;
+}
+
+.siska-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.siska-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  text-align: left;
+}
+
+.siska-nav-btn:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.siska-nav-btn.active {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.siska-nav-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bottom Profile */
+.siska-sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.siska-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 10px;
+  background-color: #f9fafb;
+}
+
+.siska-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.siska-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.siska-user-fullname {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.siska-user-tag {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.siska-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 42px;
+  border: 1px solid #fee2e2;
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.siska-logout-btn:hover {
+  background-color: #fee2e2;
+}
+
