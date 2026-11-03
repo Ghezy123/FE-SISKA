@@ -47,20 +47,21 @@ export const CartProvider = ({ children }) => {
     return () => window.removeEventListener('siska_products_updated', syncWithProducts);
   }, []);
 
-  const addToCart = (product) => {
+  const addToCart = (product, quantityToAdd = 1) => {
     if (product.stok <= 0) return;
 
     setCartItems((prevItems) => {
       const existing = prevItems.find((item) => item.id === product.id);
       if (existing) {
-        if (existing.quantity >= product.stok) return prevItems;
+        const newQty = existing.quantity + quantityToAdd;
+        if (newQty > product.stok) return prevItems;
         return prevItems.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQty }
             : item
         );
       }
-      return [...prevItems, { ...product, quantity: 1 }];
+      return [...prevItems, { ...product, quantity: Math.min(quantityToAdd, product.stok) }];
     });
   };
 

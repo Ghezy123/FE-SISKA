@@ -3,13 +3,24 @@ import { STORAGE_KEYS } from '../utils/constants';
 
 export const authService = {
   async login(credentials) {
-    // Simulasi atau request ke backend: return api.post('/auth/login', credentials);
-    // Untuk keperluan template / pengembangan awal:
-    if (credentials.username && credentials.password) {
+    if (!credentials.username || !credentials.password) {
+      throw new Error('Username dan password wajib diisi');
+    }
+
+    // Validasi kredensial (Hardcoded sesuai spesifikasi)
+    // Username: "Alya fotocopy" (toleran huruf besar/kecil & spasi)
+    // Password: "Sawahlunto123" (case-sensitive)
+    const validUsername = 'alya fotocopy';
+    const validPassword = 'Sawahlunto123';
+
+    const inputUser = credentials.username.trim().toLowerCase();
+    const inputPass = credentials.password;
+
+    if (inputUser === validUsername && inputPass === validPassword) {
       const mockUser = {
         id: 'usr_01',
-        nama: 'Kasir SISKA',
-        username: credentials.username,
+        nama: 'Petugas Toko',
+        username: credentials.username.trim(),
         role: 'admin',
         token: 'mock-jwt-token-siska-2026',
       };
@@ -17,7 +28,8 @@ export const authService = {
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(mockUser));
       return mockUser;
     }
-    throw new Error('Username dan password wajib diisi');
+
+    throw new Error('Username atau password salah. Silakan coba lagi.');
   },
 
   logout() {

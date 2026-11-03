@@ -1,14 +1,19 @@
 import { useState, useMemo, useEffect } from 'react';
 import { productService } from '../../services/productService';
+import { layananService } from '../../services/layananService';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import { formatRupiah } from '../../utils/helpers';
 import './KasirPage.css';
 
 export const KasirPage = () => {
+  const { warning, success } = useToast();
   const [products, setProducts] = useState([]);
+  const [services, setServices] = useState([]);
   const [activeTab, setActiveTab] = useState('atk'); // 'atk' | 'cetak'
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
   const [searchQuery, setSearchQuery] = useState('');
+  const [serviceQty, setServiceQty] = useState({}); // { srv_id: qty }
   const { addToCart, cartItems } = useCart();
 
   // Load produk dari productService dan pasang listener update real-time
@@ -16,11 +21,24 @@ export const KasirPage = () => {
     setProducts(productService.getProducts());
   };
 
+  const loadServices = () => {
+    setServices(layananService.getServices());
+  };
+
   useEffect(() => {
     loadProducts();
-    const handleUpdate = () => loadProducts();
-    window.addEventListener('siska_products_updated', handleUpdate);
-    return () => window.removeEventListener('siska_products_updated', handleUpdate);
+    loadServices();
+
+    const handleProductUpdate = () => loadProducts();
+    const handleServiceUpdate = () => loadServices();
+
+    window.addEventListener('siska_products_updated', handleProductUpdate);
+    window.addEventListener('siska_services_updated', handleServiceUpdate);
+
+    return () => {
+      window.removeEventListener('siska_products_updated', handleProductUpdate);
+      window.removeEventListener('siska_services_updated', handleServiceUpdate);
+    };
   }, []);
 
   // Daftar Kategori Unik dari data produk aktif
@@ -40,7 +58,7 @@ export const KasirPage = () => {
         item.kategori.toLowerCase() === selectedCategory.toLowerCase();
       const matchQuery =
         item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.kode.toLowerCase().includes(searchQuery.toLowerCase());
+        (item.kode && item.kode.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchCat && matchQuery;
     });
   }, [products, selectedCategory, searchQuery]);
@@ -55,6 +73,43 @@ export const KasirPage = () => {
     }).format(new Date());
   }, []);
 
+  const handleAddProduct = (product) => {
+    if (product.stok <= 0) {
+      warning('Stok barang habis');
+      return;
+    }
+    const inCart = cartItems.find((i) => i.id === product.id);
+    if (inCart && inCart.quantity >= product.stok) {
+      warning(`Stok tidak mencukupi (sisa ${product.stok} ${product.satuan || 'unit'})`);
+      return;
+    }
+    addToCart(product, 1);
+    success(`${product.nama} ditambahkan`);
+  };
+
+  const handleAddService = (srv) => {
+    const qty = Number(serviceQty[srv.id]) || 1;
+    if (qty <= 0) {
+      warning('Jumlah lembar/buku minimal 1');
+      return;
+    }
+    addToCart(
+      {
+        id: srv.id,
+        nama: srv.nama,
+        kategori: srv.kategori,
+        harga: srv.harga,
+        satuan: srv.satuan || 'lembar',
+        stok: 999999,
+        isService: true,
+      },
+      qty
+    );
+    success(`${srv.nama} (${qty} ${srv.satuan || 'lembar'}) ditambahkan ke keranjang`);
+    // Reset qty
+    setServiceQty((prev) => ({ ...prev, [srv.id]: 1 }));
+  };
+
   return (
     <div className="siska-kasir-container">
       {/* Kasir Header */}
@@ -63,12 +118,12 @@ export const KasirPage = () => {
           <span className="siska-kasir-date">{todayFormatted}</span>
           <h1 className="siska-kasir-title">Kasir</h1>
           <p className="siska-kasir-desc">
-            Pilih barang untuk ditambahkan ke keranjang.
+            Pilih barang ATK atau hitung layanan fotokopi & jasa cetak.
           </p>
         </div>
         <div className="siska-store-status-badge">
           <span className="siska-status-dot"></span>
-          <span>Toko Buka</span>
+          <span>Alya Fotocopy • Buka</span>
         </div>
       </header>
 
@@ -87,7 +142,7 @@ export const KasirPage = () => {
           </div>
           <div className="siska-mode-info">
             <span className="siska-mode-title">Barang ATK</span>
-            <span className="siska-mode-sub">Pilih produk alat tulis</span>
+            <span className="siska-mode-sub">Pilih produk alat tulis & kertas</span>
           </div>
         </button>
 
@@ -105,7 +160,7 @@ export const KasirPage = () => {
           </div>
           <div className="siska-mode-info">
             <span className="siska-mode-title">Layanan Cetak & Jasa</span>
-            <span className="siska-mode-sub">Hitung print, fotokopi, dan jilid</span>
+            <span className="siska-mode-sub">Hitung print, fotokopi, laminating, jilid</span>
           </div>
         </button>
       </div>
@@ -157,16 +212,14 @@ export const KasirPage = () => {
             {filteredProducts.map((product) => {
               const inCart = cartItems.find((i) => i.id === product.id);
               const isOutOfStock = product.stok <= 0;
-              const isLowStock = product.stok > 0 && product.stok <= 5;
+              const isLowStock = product.stok > 0 && product.stok <= (product.stok_minimal || 5);
               const isMaxInCart = inCart && inCart.quantity >= product.stok;
 
               return (
                 <div
                   key={product.id}
                   className={`siska-product-card ${inCart ? 'in-cart' : ''} ${isOutOfStock ? 'disabled' : ''}`}
-                  onClick={() => {
-                    if (!isOutOfStock && !isMaxInCart) addToCart(product);
-                  }}
+                  onClick={() => handleAddProduct(product)}
                   style={{
                     opacity: isOutOfStock ? 0.6 : 1,
                     cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
@@ -181,7 +234,7 @@ export const KasirPage = () => {
                         color: isOutOfStock ? '#dc2626' : undefined,
                       }}
                     >
-                      {isOutOfStock ? 'Habis' : `Stok ${product.stok}`}
+                      {isOutOfStock ? 'Habis' : isLowStock ? `Stok Menipis (${product.stok})` : `Stok ${product.stok} ${product.satuan || ''}`}
                     </span>
                   </div>
 
@@ -197,7 +250,7 @@ export const KasirPage = () => {
                       disabled={isOutOfStock || isMaxInCart}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!isOutOfStock && !isMaxInCart) addToCart(product);
+                        handleAddProduct(product);
                       }}
                       title={isOutOfStock ? 'Stok habis' : isMaxInCart ? 'Maksimal stok tercapai' : 'Tambah ke keranjang'}
                       style={{
@@ -218,63 +271,80 @@ export const KasirPage = () => {
           </div>
         </>
       ) : (
-        /* Kalkulator Layanan Cetak & Jasa (Frame 6:1403) */
+        /* Kalkulator Layanan Cetak & Jasa (SRS Tabel 4 & Frame 6:1403) */
         <div className="siska-layanan-cetak-panel">
           <div className="siska-layanan-cetak-header">
-            <h2>Kalkulator Layanan Cetak & Jasa</h2>
-            <p>Pilih jenis kertas, warna, dan jilid untuk dihitung secara otomatis.</p>
+            <h2>Kalkulator Layanan Cetak & Jasa (Alya Fotocopy)</h2>
+            <p>Masukkan jumlah lembar, halaman, atau buku untuk kalkulasi biaya instan ke kasir.</p>
           </div>
           <div className="siska-layanan-cards">
-            <div
-              className="siska-service-option"
-              onClick={() =>
-                addToCart({
-                  id: 'srv_print_bw',
-                  nama: 'Print Dokumen Hitam Putih (A4)',
-                  kategori: 'Jasa Cetak',
-                  harga: 500,
-                  stok: 9999,
-                })
-              }
-            >
-              <h3>Print Hitam Putih (A4)</h3>
-              <p>Rp 500 / lembar</p>
-              <button type="button" className="siska-add-service-btn">+ Tambah ke Keranjang</button>
-            </div>
+            {services.map((srv) => {
+              const currentQty = serviceQty[srv.id] || 1;
+              const subtotalCalc = srv.harga * currentQty;
 
-            <div
-              className="siska-service-option"
-              onClick={() =>
-                addToCart({
-                  id: 'srv_print_color',
-                  nama: 'Print Warna (A4)',
-                  kategori: 'Jasa Cetak',
-                  harga: 1500,
-                  stok: 9999,
-                })
-              }
-            >
-              <h3>Print Full Warna (A4)</h3>
-              <p>Rp 1.500 / lembar</p>
-              <button type="button" className="siska-add-service-btn">+ Tambah ke Keranjang</button>
-            </div>
+              return (
+                <div key={srv.id} className="siska-service-option">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase' }}>
+                        {srv.kategori}
+                      </span>
+                      <h3 style={{ margin: '4px 0 2px' }}>{srv.nama}</h3>
+                      <p style={{ margin: 0, color: '#64748b', fontSize: '13px' }}>
+                        {formatRupiah(srv.harga)} / {srv.satuan}
+                      </p>
+                    </div>
+                  </div>
 
-            <div
-              className="siska-service-option"
-              onClick={() =>
-                addToCart({
-                  id: 'srv_jilid_spiral',
-                  nama: 'Jilid Spiral Plastik + Cover',
-                  kategori: 'Jilid & Finishing',
-                  harga: 7000,
-                  stok: 9999,
-                })
-              }
-            >
-              <h3>Jilid Spiral Plastik</h3>
-              <p>Rp 7.000 / buku</p>
-              <button type="button" className="siska-add-service-btn">+ Tambah ke Keranjang</button>
-            </div>
+                  <div style={{
+                    marginTop: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: '#f8fafc',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                  }}>
+                    <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>
+                      Jumlah ({srv.satuan}):
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={currentQty}
+                      onChange={(e) => {
+                        const val = Math.max(1, parseInt(e.target.value) || 1);
+                        setServiceQty((prev) => ({ ...prev, [srv.id]: val }));
+                      }}
+                      style={{
+                        width: '70px',
+                        height: '32px',
+                        padding: '0 8px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        textAlign: 'center',
+                      }}
+                    />
+                    <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                      <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Subtotal:</span>
+                      <strong style={{ fontSize: '14px', color: '#0f172a' }}>{formatRupiah(subtotalCalc)}</strong>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="siska-add-service-btn"
+                    style={{ marginTop: '12px' }}
+                    onClick={() => handleAddService(srv)}
+                  >
+                    + Tambah ke Keranjang
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { transaksiService } from '../../services/transaksiService';
 import { formatRupiah } from '../../utils/helpers';
+import { StrukThermal } from '../../components/common/StrukThermal';
 import './LaporanPage.css';
 
 /* ─── helper: format tanggal pendek ─── */
 function formatWaktu(iso) {
+  if (!iso) return '-';
   const d = new Date(iso);
   const tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
   const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -14,8 +16,9 @@ function formatWaktu(iso) {
 /* ─── helper: label hari ─── */
 const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
-/* ─── Periode options ─── */
+/* ─── Periode options (SRS UC 4: Hari Ini, Minggu Ini / 7 Hari, Bulan Ini) ─── */
 const PERIODE = [
+  { label: 'Hari Ini', days: 0 },
   { label: '7 Hari Terakhir', days: 7 },
   { label: '30 Hari Terakhir', days: 30 },
   { label: 'Bulan Ini', days: -1 },
@@ -23,7 +26,7 @@ const PERIODE = [
 
 const LaporanPage = () => {
   const [semua, setSemua] = useState([]);
-  const [periodeIdx, setPeriodeIdx] = useState(0);
+  const [periodeIdx, setPeriodeIdx] = useState(1); // Default: 7 Hari Terakhir
   const [showPeriode, setShowPeriode] = useState(false);
   const [lihatSemua, setLihatSemua] = useState(false);
   const [detailTx, setDetailTx] = useState(null);
@@ -43,11 +46,21 @@ const LaporanPage = () => {
   /* ─── filter berdasarkan periode ─── */
   const filtered = useMemo(() => {
     const days = PERIODE[periodeIdx].days;
+    const now = new Date();
+
+    if (days === 0) {
+      // Khusus 'Hari Ini' (SRS UC4)
+      const todayStr = now.toDateString();
+      return semua.filter((t) => new Date(t.waktu).toDateString() === todayStr);
+    }
+
     if (days === -1) {
-      const now = new Date();
+      // Khusus 'Bulan Ini'
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       return semua.filter((t) => new Date(t.waktu) >= startOfMonth);
     }
+
+    // 7 hari atau 30 hari terakhir
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
     return semua.filter((t) => new Date(t.waktu) >= cutoff);
@@ -65,12 +78,12 @@ const LaporanPage = () => {
       const d = new Date(today);
       d.setDate(d.getDate() - (6 - i));
       const dayStr = d.toDateString();
-      const total = filtered
+      const total = semua
         .filter((t) => new Date(t.waktu).toDateString() === dayStr)
         .reduce((s, t) => s + t.total, 0);
       return { label: HARI[d.getDay()], total };
     });
-  }, [filtered]);
+  }, [semua]);
 
   const maxChart = Math.max(...chartData.map((d) => d.total), 1);
 
@@ -100,8 +113,12 @@ const LaporanPage = () => {
     'Z',
   ].join(' ');
 
-  /* ─── Riwayat transaksi terbaru ─── */
+  /* ─── Riwayat transaksi ─── */
   const riwayat = lihatSemua ? filtered : filtered.slice(0, 8);
+
+  const handlePrintStruk = () => {
+    window.print();
+  };
 
   return (
     <div className="laporan-page">
@@ -110,7 +127,7 @@ const LaporanPage = () => {
         <div className="lap-header-left">
           <span className="lap-eyebrow">RINGKASAN BISNIS</span>
           <h1 className="lap-title">Laporan &amp; Riwayat</h1>
-          <p className="lap-subtitle">Pantau performa penjualan toko Anda.</p>
+          <p className="lap-subtitle">Pantau performa penjualan dan keuangan Alya Fotocopy.</p>
         </div>
         {/* Periode selector */}
         <div className="lap-periode-wrap">
@@ -155,9 +172,9 @@ const LaporanPage = () => {
             </svg>
           </div>
           <div className="lap-stat-body">
-            <span className="lap-stat-label">Total Omzet</span>
+            <span className="lap-stat-label">Total Omzet ({PERIODE[periodeIdx].label})</span>
             <span className="lap-stat-value">{formatRupiah(totalOmzet)}</span>
-            <span className="lap-stat-growth">↑ 12,5% dari minggu lalu</span>
+            <span className="lap-stat-growth">↑ Tercatat dari sistem kasir</span>
           </div>
         </div>
         {/* Transaksi */}
@@ -172,7 +189,7 @@ const LaporanPage = () => {
           <div className="lap-stat-body">
             <span className="lap-stat-label">Total Transaksi</span>
             <span className="lap-stat-value">{totalTransaksi}</span>
-            <span className="lap-stat-growth">↑ 8,2% dari minggu lalu</span>
+            <span className="lap-stat-growth">↑ Struk berhasil digenerate</span>
           </div>
         </div>
         {/* Barang */}
@@ -185,9 +202,9 @@ const LaporanPage = () => {
             </svg>
           </div>
           <div className="lap-stat-body">
-            <span className="lap-stat-label">Barang Terjual</span>
+            <span className="lap-stat-label">Barang &amp; Layanan Terjual</span>
             <span className="lap-stat-value">{totalBarang}</span>
-            <span className="lap-stat-growth">↑ 6,4% dari minggu lalu</span>
+            <span className="lap-stat-growth">↑ Item keluar toko</span>
           </div>
         </div>
       </div>
@@ -196,18 +213,17 @@ const LaporanPage = () => {
       <div className="lap-chart-card">
         <div className="lap-chart-header">
           <div>
-            <h2 className="lap-chart-title">Tren Pendapatan</h2>
-            <p className="lap-chart-sub">Total pendapatan per hari</p>
+            <h2 className="lap-chart-title">Tren Pendapatan (7 Hari Terakhir)</h2>
+            <p className="lap-chart-sub">Pergerakan total omzet harian toko</p>
           </div>
           <div className="lap-chart-legend">
             <span className="lap-chart-dot" />
-            <span className="lap-chart-legend-label">Omzet</span>
+            <span className="lap-chart-legend-label">Omzet Harian</span>
           </div>
         </div>
 
         {/* SVG chart */}
         <div className="lap-chart-body">
-          {/* Y-axis labels */}
           <div className="lap-y-axis">
             {[maxChart, maxChart * 0.75, maxChart * 0.5, maxChart * 0.25, 0].map((v, i) => (
               <span key={i} className="lap-y-label">{fmtAxis(Math.round(v))}</span>
@@ -215,12 +231,10 @@ const LaporanPage = () => {
           </div>
           <div className="lap-svg-wrap">
             <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-              {/* Grid lines */}
               {[0, 0.25, 0.5, 0.75, 1].map((frac, i) => {
                 const y = PAD.top + chartH * (1 - frac);
                 return <line key={i} x1="0" y1={y} x2={W} y2={y} stroke="#eef0f3" strokeWidth="1" />;
               })}
-              {/* Area fill */}
               <defs>
                 <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#2563eb" stopOpacity="0.15" />
@@ -228,14 +242,11 @@ const LaporanPage = () => {
                 </linearGradient>
               </defs>
               <path d={areaPath} fill="url(#chartGrad)" />
-              {/* Line */}
               <path d={linePath} fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinejoin="round" />
-              {/* Dots */}
               {pts.map((p, i) => (
                 <circle key={i} cx={p.x} cy={p.y} r="4" fill="#2563eb" />
               ))}
             </svg>
-            {/* X-axis labels */}
             <div className="lap-x-axis">
               {chartData.map((d, i) => (
                 <span key={i} className="lap-x-label">{d.label}</span>
@@ -250,14 +261,16 @@ const LaporanPage = () => {
         <div className="lap-riwayat-header">
           <div>
             <h2 className="lap-riwayat-title">Riwayat Transaksi</h2>
-            <p className="lap-riwayat-sub">Daftar transaksi terbaru</p>
+            <p className="lap-riwayat-sub">Daftar transaksi penjualan pelanggan</p>
           </div>
-          <button
-            className="btn-lihat-semua"
-            onClick={() => setLihatSemua((v) => !v)}
-          >
-            {lihatSemua ? 'Tampilkan Lebih Sedikit' : 'Lihat Semua'}
-          </button>
+          {filtered.length > 8 && (
+            <button
+              className="btn-lihat-semua"
+              onClick={() => setLihatSemua((v) => !v)}
+            >
+              {lihatSemua ? 'Tampilkan Lebih Sedikit' : `Lihat Semua (${filtered.length})`}
+            </button>
+          )}
         </div>
 
         <table className="lap-table">
@@ -273,7 +286,9 @@ const LaporanPage = () => {
           <tbody>
             {riwayat.length === 0 ? (
               <tr>
-                <td colSpan={5} className="lap-empty">Belum ada transaksi</td>
+                <td colSpan={5} className="lap-empty">
+                  Belum ada transaksi pada periode <strong>{PERIODE[periodeIdx].label}</strong>
+                </td>
               </tr>
             ) : (
               riwayat.map((t) => (
@@ -287,7 +302,7 @@ const LaporanPage = () => {
                       {formatWaktu(t.waktu)}
                     </span>
                   </td>
-                  <td className="lap-cell-barang">{t.jumlahBarang} barang</td>
+                  <td className="lap-cell-barang">{t.jumlahBarang} item</td>
                   <td className="lap-cell-total">{formatRupiah(t.total)}</td>
                   <td>
                     <button
@@ -308,15 +323,15 @@ const LaporanPage = () => {
         </table>
       </div>
 
-      {/* ── Modal Detail Transaksi ── */}
+      {/* ── Modal Detail Transaksi & Cetak Ulang Struk (SRS UC 4 Langkah 7) ── */}
       {detailTx && (
         <div className="modal-backdrop" onClick={() => setDetailTx(null)}>
           <div className="modal-dialog modal-dialog-md" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-header-text">
-                <span className="modal-eyebrow">DETAIL TRANSAKSI</span>
+                <span className="modal-eyebrow">DETAIL &amp; CETAK ULANG STRUK</span>
                 <h2 className="modal-title">{detailTx.id}</h2>
-                <p className="modal-subtitle">{formatWaktu(detailTx.waktu)}</p>
+                <p className="modal-subtitle">{formatWaktu(detailTx.waktu)} • Petugas: Admin Toko</p>
               </div>
               <button className="modal-close-btn" onClick={() => setDetailTx(null)} aria-label="Tutup">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -324,11 +339,22 @@ const LaporanPage = () => {
                 </svg>
               </button>
             </div>
+
             <div className="modal-body">
+              {/* Receipt Visual Header */}
+              <div style={{ textAlign: 'center', marginBottom: '14px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '10px' }}>
+                <h3 style={{ margin: '0 0 2px', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>
+                  ALYA FOTOCOPY &amp; ATK
+                </h3>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  Layanan Fotokopi, Jilid, &amp; Penjualan ATK
+                </span>
+              </div>
+
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb', textAlign: 'left', color: '#6b7280' }}>
-                    <th style={{ padding: '10px 12px' }}>BARANG</th>
+                    <th style={{ padding: '10px 12px' }}>BARANG / JASA</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center' }}>QTY</th>
                     <th style={{ padding: '10px 12px', textAlign: 'right' }}>HARGA</th>
                     <th style={{ padding: '10px 12px', textAlign: 'right' }}>SUBTOTAL</th>
@@ -356,11 +382,11 @@ const LaporanPage = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px',
-                marginTop: '12px',
+                marginTop: '14px',
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#64748b' }}>
-                  <span>Total {detailTx.jumlahBarang} Barang</span>
-                  <strong style={{ color: '#0f172a', fontSize: '15px' }}>{formatRupiah(detailTx.total)}</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+                  <span>Total Belanja</span>
+                  <span style={{ color: '#2563eb', fontSize: '16px' }}>{formatRupiah(detailTx.total)}</span>
                 </div>
                 {detailTx.uangDiterima !== undefined && (
                   <>
@@ -376,16 +402,33 @@ const LaporanPage = () => {
                 )}
               </div>
             </div>
-            <div className="modal-footer">
+
+            <div className="modal-footer" style={{ display: 'flex', gap: '10px' }}>
               <button
                 type="button"
                 className="btn-batal"
-                style={{ width: '100%' }}
+                style={{ flex: 1 }}
                 onClick={() => setDetailTx(null)}
               >
                 Tutup
               </button>
+              <button
+                type="button"
+                className="btn-simpan"
+                style={{ flex: 1.5, justifyContent: 'center' }}
+                onClick={handlePrintStruk}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                Cetak Ulang Struk
+              </button>
             </div>
+
+            {/* Struk POS Thermal Printable */}
+            <StrukThermal transaction={detailTx} cashierName="Petugas Toko" />
           </div>
         </div>
       )}

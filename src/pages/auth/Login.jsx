@@ -4,7 +4,7 @@ import './Login.css';
 
 export const Login = () => {
   const { login } = useAuth();
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -54,10 +54,10 @@ export const Login = () => {
 
         {/* Header Typography */}
         <div className="figma-login-header">
-          <span className="figma-login-badge">SISTEM KASIR & INVENTORI</span>
+          <span className="figma-login-badge">SISKA • ALYA FOTOCOPY</span>
           <h1 className="figma-login-title">Masuk ke SISKA</h1>
           <p className="figma-login-subtitle">
-            Silakan masukkan akun Anda untuk melanjutkan.
+            Sistem Informasi Kasir & Inventori ATK
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export const Login = () => {
                 className="figma-input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
+                placeholder="Masukkan username"
                 autoComplete="username"
                 required
               />

@@ -1,15 +1,18 @@
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 import { AppRoutes } from './routes/AppRoutes';
 import './App.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <AppRoutes />
-      </CartProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <CartProvider>
+          <AppRoutes />
+        </CartProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

@@ -1,26 +1,29 @@
 import React, { useState } from 'react';
+import { useToast } from '../../context/ToastContext';
 import './StokModals.css';
 
 /**
- * Modal Update Stok — Figma frame 6:9711
+ * Modal Update Stok (Restok) — Figma frame 6:9711
  * Fields: Stok Awal (readonly), Stok yang Ditambah
  * Confirm pop-up 6:10360 is baked-in via confirmStep
  */
 const ModalUpdateStok = ({ product, onClose, onSave }) => {
+  const { warning } = useToast();
   const [tambah, setTambah] = useState('');
   const [confirmStep, setConfirmStep] = useState(false);
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (!tambah || Number(tambah) < 0) {
-      alert('Masukkan jumlah stok yang ditambah');
+    const qty = Number(tambah);
+    if (!tambah || isNaN(qty) || qty <= 0) {
+      warning('Masukkan jumlah stok yang valid (lebih dari 0)');
       return;
     }
     setConfirmStep(true);
   };
 
   const handleSave = () => {
-    onSave({ ...product, stok: product.stok + Number(tambah) });
+    onSave(product, Number(tambah), 'Restok barang masuk');
   };
 
   if (confirmStep) {
@@ -34,6 +37,9 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
               </svg>
             </div>
             <h2 className="confirm-dialog-title">Simpan Update Stok?</h2>
+            <p className="confirm-dialog-sub">
+              Stok <strong>{product.nama}</strong> akan bertambah <strong>+{tambah} {product.satuan || 'unit'}</strong> (Total: {product.stok + Number(tambah)}).
+            </p>
           </div>
           <div className="modal-footer modal-footer-center">
             <div className="update-choice-group">
@@ -53,7 +59,7 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-dialog modal-dialog-xs" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-dialog modal-dialog-sm" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="modal-header">
           <div className="modal-header-text">
@@ -82,14 +88,14 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
                 />
               </div>
               <div className="form-field">
-                <label className="form-label">Stok yang Ditambah</label>
+                <label className="form-label">Stok Ditambah</label>
                 <input
                   className="form-input"
                   type="number"
                   value={tambah}
                   onChange={(e) => setTambah(e.target.value)}
                   placeholder="500"
-                  min="0"
+                  min="1"
                   required
                   autoFocus
                 />
@@ -113,4 +119,3 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
 };
 
 export default ModalUpdateStok;
-

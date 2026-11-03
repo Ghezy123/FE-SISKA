@@ -24,21 +24,42 @@ export const transaksiService = {
     const padded = String(all.length + 1).padStart(3, '0');
     const now = new Date();
     const dateStr = `${String(now.getDate()).padStart(2, '0')}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getFullYear()).slice(-2)}`;
+    const noStruk = `TRX-${dateStr}-${padded}`;
     
     const newTx = {
-      id: `TRX-${dateStr}-${padded}`,
+      // Standar SRS (Tabel 6: transactions)
+      id_transaksi: all.length + 1,
+      no_struk: noStruk,
+      id_user: 1,
+      tanggal_transaksi: now.toISOString(),
+      total_harga: total,
+      uang_bayar: Number(uangDiterima) || total,
+      kembalian: Number(kembalian) || 0,
+
+      // Standar SRS (Tabel 7: transaction_details)
+      transaction_details: items.map((i, idx) => ({
+        id_detail: idx + 1,
+        id_transaksi: all.length + 1,
+        id_barang: i.isService ? null : i.id,
+        id_layanan: i.isService ? i.id : null,
+        qty: i.quantity || i.qty || 1,
+        harga_satuan: i.harga,
+        subtotal: i.harga * (i.quantity || i.qty || 1),
+      })),
+
+      // Alias untuk kompatibilitas frontend
+      id: noStruk,
       waktu: now.toISOString(),
       items: items.map((i) => ({
         id: i.id,
         nama: i.nama,
-        qty: i.quantity,
+        qty: i.quantity || i.qty || 1,
         harga: i.harga,
-        subtotal: i.harga * i.quantity,
+        subtotal: i.harga * (i.quantity || i.qty || 1),
       })),
-      jumlahBarang: items.reduce((s, i) => s + i.quantity, 0),
+      jumlahBarang: items.reduce((s, i) => s + (i.quantity || i.qty || 1), 0),
       total,
       uangDiterima: Number(uangDiterima) || total,
-      kembalian: Number(kembalian) || 0,
     };
 
     const updated = [newTx, ...all];

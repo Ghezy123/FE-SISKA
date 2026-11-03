@@ -52,7 +52,7 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
         </div>
         <div className="siska-brand-text">
           <h2 className="siska-brand-name">SISKA</h2>
-          <span className="siska-brand-desc">Kasir & Inventori</span>
+          <span className="siska-brand-desc">Alya Fotocopy</span>
         </div>
       </div>
 
@@ -81,11 +81,11 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
       <div className="siska-sidebar-bottom">
         <div className="siska-user-card">
           <div className="siska-user-avatar">
-            {user?.nama ? user.nama.slice(0, 2).toUpperCase() : 'AR'}
+            {user?.nama ? user.nama.slice(0, 2).toUpperCase() : 'PT'}
           </div>
           <div className="siska-user-details">
-            <span className="siska-user-fullname">{user?.nama || 'Admin Toko'}</span>
-            <span className="siska-user-tag">{user?.role === 'admin' ? 'Pemilik' : 'Kasir'}</span>
+            <span className="siska-user-fullname">{user?.nama || 'Petugas Toko'}</span>
+            <span className="siska-user-tag">Kasir & Stok</span>
           </div>
         </div>
 

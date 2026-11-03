@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
+import { useToast } from '../../context/ToastContext';
 import './StokModals.css';
 
 const CATEGORIES = ['Kertas', 'Alat Tulis', 'Buku', 'Tinta Printer', 'Arsip', 'Perekat', 'Lainnya'];
+const SATUAN_OPTIONS = ['Pcs', 'Rim', 'Buku', 'Botol', 'Pack', 'Lusin', 'Lembar'];
 
 const ModalTambahBarang = ({ onClose, onSave }) => {
+  const { warning } = useToast();
   const [form, setForm] = useState({
     nama: '',
     hargaBeli: '',
     harga: '',
     kategori: '',
-    kode: '',
+    satuan: 'Pcs',
     stok: 0,
-    satuan: 'unit',
+    stok_minimal: 5,
+    kode: '',
   });
 
   const handleChange = (e) => {
@@ -21,16 +25,32 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.nama || !form.harga || !form.kategori) {
-      alert('Nama, Harga Jual, dan Kategori wajib diisi');
+    const namaTrimmed = form.nama.trim();
+    if (!namaTrimmed) {
+      warning('Nama barang tidak boleh kosong');
       return;
     }
+    if (!form.harga || Number(form.harga) < 0) {
+      warning('Harga jual harus berupa nominal valid (minimal Rp 0)');
+      return;
+    }
+    if (!form.kategori) {
+      warning('Silakan pilih kategori barang');
+      return;
+    }
+    if (Number(form.stok) < 0) {
+      warning('Jumlah stok tidak boleh angka negatif');
+      return;
+    }
+
     onSave({
       ...form,
-      hargaBeli: Number(form.hargaBeli) || 0,
-      harga: Number(form.harga),
-      stok: Number(form.stok) || 0,
-      kode: form.kode || `ATK-${Date.now().toString().slice(-4)}`,
+      nama: namaTrimmed,
+      hargaBeli: Math.max(0, Number(form.hargaBeli) || 0),
+      harga: Math.max(0, Number(form.harga)),
+      stok: Math.max(0, Number(form.stok) || 0),
+      stok_minimal: Math.max(0, Number(form.stok_minimal) || 5),
+      kode: form.kode.trim() || `ATK-${Date.now().toString().slice(-4)}`,
     });
   };
 
@@ -63,11 +83,13 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
                 onChange={handleChange}
                 placeholder="Contoh: Kertas HVS A4 80gsm"
                 required
+                autoFocus
               />
             </div>
+
             <div className="modal-body-row">
               <div className="form-field">
-                <label className="form-label">Harga Beli</label>
+                <label className="form-label">Harga Beli (Modal)</label>
                 <input
                   className="form-input"
                   type="number"
@@ -92,12 +114,48 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
                 />
               </div>
             </div>
-            <div className="form-field">
-              <label className="form-label">Kategori</label>
-              <select className="form-select form-input" name="kategori" value={form.kategori} onChange={handleChange} required>
-                <option value="">Pilih kategori</option>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
+
+            <div className="modal-body-row">
+              <div className="form-field">
+                <label className="form-label">Kategori</label>
+                <select className="form-select form-input" name="kategori" value={form.kategori} onChange={handleChange} required>
+                  <option value="">Pilih kategori</option>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="form-field">
+                <label className="form-label">Satuan</label>
+                <select className="form-select form-input" name="satuan" value={form.satuan} onChange={handleChange}>
+                  {SATUAN_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-body-row">
+              <div className="form-field">
+                <label className="form-label">Jumlah Stok Awal</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  name="stok"
+                  value={form.stok}
+                  onChange={handleChange}
+                  min="0"
+                  placeholder="0"
+                />
+              </div>
+              <div className="form-field">
+                <label className="form-label">Batas Stok Minimal (Peringatan)</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  name="stok_minimal"
+                  value={form.stok_minimal}
+                  onChange={handleChange}
+                  min="0"
+                  placeholder="5"
+                />
+              </div>
             </div>
           </div>
 
@@ -118,4 +176,3 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
 };
 
 export default ModalTambahBarang;
-

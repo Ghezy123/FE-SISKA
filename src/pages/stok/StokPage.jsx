@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { productService } from '../../services/productService';
 import { formatRupiah } from '../../utils/helpers';
+import { useToast } from '../../context/ToastContext';
 import ModalTambahBarang from '../../components/stok/ModalTambahBarang';
 import ModalUpdateHarga from '../../components/stok/ModalUpdateHarga';
 import ModalUpdateStok from '../../components/stok/ModalUpdateStok';
@@ -11,6 +12,7 @@ import './StokPage.css';
 const ITEMS_PER_PAGE = 8;
 
 const StokPage = () => {
+  const { success } = useToast();
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [filterKategori, setFilterKategori] = useState('Semua Kategori');
@@ -18,10 +20,10 @@ const StokPage = () => {
 
   // Modal states
   const [modalTambah, setModalTambah] = useState(false);
-  const [modalUpdateApa, setModalUpdateApa] = useState(null);   // product | null
-  const [modalUpdateHarga, setModalUpdateHarga] = useState(null); // product | null
-  const [modalUpdateStok, setModalUpdateStok] = useState(null);  // product | null
-  const [modalHapus, setModalHapus] = useState(null);            // product | null
+  const [modalUpdateApa, setModalUpdateApa] = useState(null);
+  const [modalUpdateHarga, setModalUpdateHarga] = useState(null);
+  const [modalUpdateStok, setModalUpdateStok] = useState(null);
+  const [modalHapus, setModalHapus] = useState(null);
 
   const refresh = () => {
     setProducts(productService.getProducts());
@@ -43,7 +45,7 @@ const StokPage = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return products.filter((p) => {
-      const matchSearch = p.nama.toLowerCase().includes(q) || p.kode.toLowerCase().includes(q);
+      const matchSearch = p.nama.toLowerCase().includes(q) || (p.kode && p.kode.toLowerCase().includes(q));
       const matchKat = filterKategori === 'Semua Kategori' || p.kategori === filterKategori;
       return matchSearch && matchKat;
     });
@@ -54,10 +56,10 @@ const StokPage = () => {
 
   /* ──────────── CRUD handlers ──────────── */
   const handleSaveTambah = (newProduct) => {
-    const updated = [...products, { ...newProduct, id: `prd_${Date.now()}` }];
-    productService.saveProducts(updated);
+    productService.tambahBarang(newProduct, 'Admin Toko');
     setModalTambah(false);
     refresh();
+    success('Barang baru berhasil disimpan');
   };
 
   const handleSaveHarga = (updatedProduct) => {
@@ -65,27 +67,28 @@ const StokPage = () => {
     productService.saveProducts(updated);
     setModalUpdateHarga(null);
     refresh();
+    success('Harga barang berhasil diperbarui');
   };
 
-  const handleSaveStok = (updatedProduct) => {
-    const updated = products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p));
-    productService.saveProducts(updated);
+  const handleSaveStok = (product, tambahQty, catatan) => {
+    productService.restokBarang(product.id, tambahQty, 'Admin Toko', catatan);
     setModalUpdateStok(null);
     refresh();
+    success(`Stok ${product.nama} berhasil ditambahkan (+${tambahQty})`);
   };
 
   const handleHapus = (product) => {
-    const updated = products.filter((p) => p.id !== product.id);
-    productService.saveProducts(updated);
+    productService.hapusBarang(product.id);
     setModalHapus(null);
     refresh();
+    success(`Barang "${product.nama}" berhasil dihapus`);
   };
 
-  /* ──────────── Stok badge coloring ──────────── */
-  const getStokStyle = (stok) => {
-    if (stok >= 10) return { bg: '#f0fdf4', color: '#15803d' };  // green
-    if (stok >= 5)  return { bg: '#fefce8', color: '#a16207' };  // yellow (Figma: amber)
-    return { bg: '#fff1f2', color: '#be123c' };                  // red (low)
+  /* ──────────── Stok badge coloring (BRD & SRS Peringatan Stok) ──────────── */
+  const getStokStyle = (stok, minStok = 5) => {
+    if (stok <= 0) return { bg: '#fee2e2', color: '#dc2626', label: 'Habis' };
+    if (stok <= minStok) return { bg: '#fefce8', color: '#a16207', label: `${stok}` };
+    return { bg: '#f0fdf4', color: '#15803d', label: `${stok}` };
   };
 
   /* ──────────── Render ──────────── */
@@ -158,20 +161,39 @@ const StokPage = () => {
               </tr>
             ) : (
               paginated.map((p) => {
-                const st = getStokStyle(p.stok);
+                const st = getStokStyle(p.stok, p.stok_minimal);
                 return (
                   <tr key={p.id}>
-                    <td className="cell-kode">{p.kode}</td>
-                    <td className="cell-nama">{p.nama}</td>
+                    <td className="cell-kode">{p.kode || '-'}</td>
+                    <td className="cell-nama">
+                      <div>{p.nama}</div>
+                      <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '400' }}>
+                        Min. {p.stok_minimal || 5} {p.satuan || 'Pcs'}
+                      </span>
+                    </td>
                     <td>
                       <span className="kategori-badge">{p.kategori}</span>
                     </td>
                     <td className="cell-harga-beli">{formatRupiah(p.hargaBeli ?? p.harga)}</td>
                     <td className="cell-harga-jual">{formatRupiah(p.harga)}</td>
                     <td>
-                      <span className="stok-badge" style={{ background: st.bg, color: st.color }}>
-                        {p.stok} unit
-                      </span>
+                      <button
+                        type="button"
+                        className="stok-badge"
+                        style={{
+                          background: st.bg,
+                          color: st.color,
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                        onClick={() => setModalUpdateStok(p)}
+                        title="Klik untuk tambah stok"
+                      >
+                        {p.stok <= 0 ? 'Habis (0)' : `${p.stok} ${p.satuan || 'unit'}`}
+                      </button>
                     </td>
                     <td>
                       <div className="aksi-group">
@@ -209,7 +231,7 @@ const StokPage = () => {
         {/* ── Pagination ── */}
         <div className="stok-pagination">
           <span className="pagination-info">
-            Menampilkan {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, filtered.length)}–{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} dari {filtered.length} barang
+            Menampilkan {filtered.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} dari {filtered.length} barang
           </span>
           <div className="pagination-controls">
             <button
@@ -229,7 +251,7 @@ const StokPage = () => {
             ))}
             <button
               className="page-btn"
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || filtered.length === 0}
               onClick={() => setCurrentPage((p) => p + 1)}
               aria-label="Halaman berikutnya"
             >→</button>

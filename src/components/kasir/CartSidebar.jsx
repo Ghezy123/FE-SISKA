@@ -47,7 +47,7 @@ export const CartSidebar = ({ onCheckout }) => {
                 <div className="siska-cart-item-info">
                   <span className="siska-cart-item-name">{item.nama}</span>
                   <span className="siska-cart-item-price">
-                    {formatRupiah(item.harga)}
+                    {formatRupiah(item.harga)}{item.satuan ? ` / ${item.satuan}` : ''}
                   </span>
                 </div>
 

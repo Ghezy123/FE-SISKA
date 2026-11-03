@@ -10,6 +10,7 @@ import { useCart } from '../context/CartContext';
 import { formatRupiah } from '../utils/helpers';
 import { productService } from '../services/productService';
 import { transaksiService } from '../services/transaksiService';
+import { StrukThermal } from '../components/common/StrukThermal';
 
 export const AppRoutes = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -153,7 +154,8 @@ export const AppRoutes = () => {
                   fontSize: '13px',
                 }}>
                   <div style={{ textAlign: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '12px' }}>
-                    <h4 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>SISKA FOTOKOPI & ATK</h4>
+                    <h4 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>ALYA FOTOCOPY</h4>
+                    <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#64748b' }}>Layanan Fotokopi, Jilid & ATK</p>
                     <span style={{ color: '#64748b', fontSize: '11px' }}>
                       {lastTransaction ? new Date(lastTransaction.waktu).toLocaleString('id-ID') : '24 Jun 2024 • 14:32'}
                     </span>
@@ -212,6 +214,9 @@ export const AppRoutes = () => {
                     Transaksi Baru
                   </button>
                 </div>
+
+                {/* Struk POS Thermal Printable (Aktif saat tombol cetak ditekan) */}
+                <StrukThermal transaction={lastTransaction} cashierName="Petugas Toko" />
               </div>
             ) : (
               /* ── Step 1: Input Pembayaran (Figma Frame 6:2328) ── */

@@ -1,0 +1,165 @@
+/* StrukThermal.css */
+
+/* Tampilan di layar jika dirender di dalam preview dialog */
+.thermal-receipt {
+  display: none;
+}
+
+/* ─── Mode Cetak POS Thermal (80mm / 58mm & PDF Print) ─── */
+@media print {
+  /* Hilangkan document flow dan tinggi halaman web */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Collapse container induk agar tidak menyumbang tinggi kosong ke halaman ke-2 */
+  .siska-pos-shell,
+  .modal-backdrop,
+  .modal-dialog {
+    position: static !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Tampilkan HANYA kontainer struk thermal */
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible !important;
+  }
+
+  #printable-receipt {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 76mm !important;
+    max-width: 76mm !important;
+    padding: 3mm 2mm !important;
+    margin: 0 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  .receipt-header .shop-title {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    margin: 0 0 2px 0 !important;
+    letter-spacing: 0.5px;
+  }
+
+  .receipt-header p {
+    font-size: 10px !important;
+    margin: 1px 0 !important;
+  }
+
+  .receipt-divider,
+  .receipt-divider-double {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: -0.5px;
+    margin: 4px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .receipt-meta {
+    font-size: 10px;
+    margin: 4px 0;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 1px 0;
+  }
+
+  .receipt-items {
+    margin: 4px 0;
+  }
+
+  .receipt-item-block {
+    margin-bottom: 4px;
+  }
+
+  .receipt-item-block .item-name {
+    font-weight: 700;
+    font-size: 11px;
+    word-break: break-word;
+  }
+
+  .receipt-item-block .item-calc {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    padding-left: 6px;
+  }
+
+  .receipt-summary {
+    margin: 4px 0;
+    font-size: 11px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 2px 0;
+  }
+
+  .summary-row.total-row {
+    font-size: 13px;
+    font-weight: 800;
+    margin: 4px 0;
+  }
+
+  .receipt-footer {
+    text-align: center;
+    font-size: 9.5px;
+    margin-top: 6px;
+  }
+
+  .receipt-footer p {
+    margin: 2px 0;
+  }
+
+  .receipt-footer .pos-brand {
+    margin-top: 5px;
+    font-size: 8.5px;
+    color: #444;
+  }
+
+  @page {
+    size: auto;
+    margin: 0;
+  }
+}
+
