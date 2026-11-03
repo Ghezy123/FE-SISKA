@@ -1,0 +1,601 @@
+/* SISKA Design System CSS */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --bg-main: #f8fafc;
+  --bg-sidebar: #0f172a;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --radius: 8px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+/* Layout */
+.siska-layout-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.siska-sidebar {
+  width: 260px;
+  background-color: var(--bg-sidebar);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 20;
+}
+
+.siska-sidebar.open {
+  width: 260px;
+}
+
+.siska-sidebar:not(.open) {
+  width: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.siska-sidebar-brand {
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.siska-brand-logo {
+  font-size: 1.8rem;
+}
+
+.siska-brand-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.siska-brand-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  display: block;
+}
+
+.siska-nav-menu {
+  flex: 1;
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.siska-menu-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 1px;
+  margin: 0.5rem 0.5rem 0.25rem;
+}
+
+.siska-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius);
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.siska-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.siska-nav-item.active {
+  background-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.siska-nav-icon {
+  font-size: 1.15rem;
+}
+
+.siska-sidebar-footer {
+  padding: 1rem 1.25rem;
+  font-size: 0.8rem;
+  color: #64748b;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.siska-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--bg-main);
+}
+
+/* Navbar */
+.siska-navbar {
+  height: 64px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.siska-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.siska-menu-toggle {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  color: var(--text-main);
+}
+
+.siska-navbar-page-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.siska-navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.siska-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.siska-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.siska-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.siska-user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.siska-user-role {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Page Body */
+.siska-content-body {
+  padding: 2rem;
+  flex: 1;
+}
+
+.siska-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.siska-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.siska-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.siska-page-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Card */
+.siska-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.siska-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.siska-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.siska-card-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.siska-card-body {
+  padding: 1.5rem;
+}
+
+/* Buttons */
+.siska-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.siska-btn-primary {
+  background-color: var(--primary);
+  color: #fff;
+}
+.siska-btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.siska-btn-outline {
+  background-color: transparent;
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+.siska-btn-outline:hover {
+  background-color: #f1f5f9;
+}
+
+.siska-btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.siska-btn-md {
+  padding: 0.6rem 1.15rem;
+  font-size: 0.95rem;
+}
+
+.siska-btn-full {
+  width: 100%;
+}
+
+/* Stats Grid */
+.siska-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.siska-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.siska-stat-icon {
+  font-size: 2rem;
+  background: var(--primary-light);
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+}
+
+.siska-stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.siska-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.siska-stat-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.siska-stat-badge {
+  font-size: 0.72rem;
+  color: var(--success);
+  font-weight: 500;
+}
+
+/* Dashboard Panels */
+.siska-dashboard-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .siska-dashboard-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.siska-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.siska-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  border-radius: var(--radius);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.siska-quick-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.siska-announcements {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+/* Table */
+.siska-table-toolbar {
+  margin-bottom: 1rem;
+}
+
+.siska-search-input {
+  width: 100%;
+  max-width: 420px;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  outline: none;
+}
+.siska-search-input:focus {
+  border-color: var(--primary);
+}
+
+.siska-table-wrapper {
+  overflow-x: auto;
+}
+
+.siska-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.siska-table th {
+  background-color: #f1f5f9;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.siska-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.siska-status-pill {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.siska-status-aktif {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+.siska-status-cuti {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.siska-row-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.siska-action-btn {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color);
+  background: white;
+  cursor: pointer;
+}
+.siska-action-btn.edit:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.siska-action-btn.delete:hover {
+  background: #fee2e2;
+  color: var(--danger);
+  border-color: #fca5a5;
+}
+
+/* Auth Layout */
+.siska-auth-wrapper {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  padding: 1.5rem;
+}
+
+.siska-auth-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 420px;
+  padding: 2.25rem;
+}
+
+.siska-auth-brand {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.siska-auth-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.siska-auth-brand h1 {
+  font-size: 1.75rem;
+  color: var(--text-main);
+  letter-spacing: 0.5px;
+}
+
+.siska-auth-brand p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.siska-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.siska-form h2 {
+  font-size: 1.25rem;
+}
+
+.siska-form-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: -0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.siska-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.siska-form-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.siska-form-group input {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  outline: none;
+}
+.siska-form-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.siska-alert-danger {
+  background-color: #fee2e2;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
