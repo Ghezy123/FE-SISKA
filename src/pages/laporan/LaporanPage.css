@@ -34,8 +34,9 @@
 
 .lap-title {
   font-size: 28px;
-  font-weight: 400;
+  font-weight: 700;
   color: #111827;
+  letter-spacing: -0.8px;
   margin: 0;
   line-height: 1.25;
 }
