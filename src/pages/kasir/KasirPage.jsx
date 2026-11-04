@@ -14,6 +14,7 @@ export const KasirPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
   const [searchQuery, setSearchQuery] = useState('');
   const [serviceQty, setServiceQty] = useState({}); // { srv_id: qty }
+  const [selectedUnits, setSelectedUnits] = useState({}); // { [productId]: chosenUnitOption }
   const { addToCart, cartItems } = useCart();
 
   // Load produk dari productService dan pasang listener update real-time
@@ -41,11 +42,19 @@ export const KasirPage = () => {
     };
   }, []);
 
-  // Daftar Kategori Unik dari data produk aktif
+  const getActiveUnit = (product) => {
+    if (selectedUnits[product.id]) return selectedUnits[product.id];
+    if (product.satuan_opsi && product.satuan_opsi.length > 0) return product.satuan_opsi[0];
+    return { nama: product.satuan || 'Pcs', pengali: 1, harga: product.harga, label: product.satuan || 'Pcs' };
+  };
+
+  // Daftar Kategori Unik dari data produk aktif (Tinta Printer sudah dihilangkan)
   const categories = useMemo(() => {
     const list = ['Semua Kategori'];
     products.forEach((p) => {
-      if (p.kategori && !list.includes(p.kategori)) list.push(p.kategori);
+      if (p.kategori && p.kategori !== 'Tinta Printer' && !list.includes(p.kategori)) {
+        list.push(p.kategori);
+      }
     });
     return list;
   }, [products]);
@@ -73,18 +82,26 @@ export const KasirPage = () => {
     }).format(new Date());
   }, []);
 
-  const handleAddProduct = (product) => {
+  const handleAddProduct = (product, unitToUse = null) => {
     if (product.stok <= 0) {
       warning('Stok barang habis');
       return;
     }
-    const inCart = cartItems.find((i) => i.id === product.id);
-    if (inCart && inCart.quantity >= product.stok) {
-      warning(`Stok tidak mencukupi (sisa ${product.stok} ${product.satuan || 'unit'})`);
+    const activeUnit = unitToUse || getActiveUnit(product);
+    const needed = activeUnit.pengali || 1;
+
+    // Hitung total unit fisik yang sudah masuk keranjang untuk barang ini
+    const currentUsed = cartItems
+      .filter((i) => i.id === product.id)
+      .reduce((sum, i) => sum + (i.quantity * (i.pengali || 1)), 0);
+
+    if (currentUsed + needed > product.stok) {
+      warning(`Stok tidak mencukupi (sisa ${product.stok - currentUsed} ${product.satuan || 'unit'})`);
       return;
     }
-    addToCart(product, 1);
-    success(`${product.nama} ditambahkan`);
+
+    addToCart(product, 1, activeUnit);
+    success(`${product.nama} (${activeUnit.label || activeUnit.nama}) ditambahkan`);
   };
 
   const handleAddService = (srv) => {
@@ -210,16 +227,25 @@ export const KasirPage = () => {
           {/* Product Grid */}
           <div className="siska-products-grid">
             {filteredProducts.map((product) => {
-              const inCart = cartItems.find((i) => i.id === product.id);
+              const activeUnit = getActiveUnit(product);
+              const currentUsed = cartItems
+                .filter((i) => i.id === product.id)
+                .reduce((sum, i) => sum + (i.quantity * (i.pengali || 1)), 0);
+              const needed = activeUnit.pengali || 1;
               const isOutOfStock = product.stok <= 0;
               const isLowStock = product.stok > 0 && product.stok <= (product.stok_minimal || 5);
-              const isMaxInCart = inCart && inCart.quantity >= product.stok;
+              const isMaxInCart = currentUsed + needed > product.stok;
+              const hasMultipleUnits = product.satuan_opsi && product.satuan_opsi.length > 1;
+
+              const itemKey = `${product.id}_${activeUnit.nama}`;
+              const inCartItem = cartItems.find((i) => i.itemKey === itemKey);
+              const anyInCart = cartItems.some((i) => i.id === product.id);
 
               return (
                 <div
                   key={product.id}
-                  className={`siska-product-card ${inCart ? 'in-cart' : ''} ${isOutOfStock ? 'disabled' : ''}`}
-                  onClick={() => handleAddProduct(product)}
+                  className={`siska-product-card ${anyInCart ? 'in-cart' : ''} ${isOutOfStock ? 'disabled' : ''}`}
+                  onClick={() => handleAddProduct(product, activeUnit)}
                   style={{
                     opacity: isOutOfStock ? 0.6 : 1,
                     cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
@@ -234,32 +260,65 @@ export const KasirPage = () => {
                         color: isOutOfStock ? '#dc2626' : undefined,
                       }}
                     >
-                      {isOutOfStock ? 'Habis' : isLowStock ? `Stok Menipis (${product.stok})` : `Stok ${product.stok} ${product.satuan || ''}`}
+                      {isOutOfStock
+                        ? 'Habis'
+                        : isLowStock
+                        ? `Menipis (${product.stok - currentUsed})`
+                        : `Stok: ${product.stok - currentUsed} ${product.satuan || ''}`}
                     </span>
                   </div>
 
                   <h3 className="siska-product-name">{product.nama}</h3>
 
+                  {/* Multi-Satuan / Borongan Selector Pills (Mendukung hingga 3 Tingkatan) */}
+                  {hasMultipleUnits && (
+                    <div
+                      className="siska-card-unit-selector"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {product.satuan_opsi.map((opt) => {
+                        const shortName = opt.namaSatuan || opt.nama?.split(' ')[0] || opt.nama;
+                        const isUnitActive = activeUnit.nama === opt.nama;
+                        return (
+                          <button
+                            key={opt.nama}
+                            type="button"
+                            className={`siska-card-unit-pill ${isUnitActive ? 'active' : ''}`}
+                            onClick={() => setSelectedUnits((prev) => ({ ...prev, [product.id]: opt }))}
+                            title={`${opt.label || opt.nama} (${opt.pengali}x = ${formatRupiah(opt.harga)})`}
+                          >
+                            {shortName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   <div className="siska-card-bottom">
-                    <span className="siska-product-price">
-                      {formatRupiah(product.harga)}
-                    </span>
+                    <div className="siska-product-price-wrap">
+                      <span className="siska-product-price">
+                        {formatRupiah(activeUnit.harga)}
+                      </span>
+                      <span className="siska-unit-subtext">
+                        /{activeUnit.namaSatuan || activeUnit.nama?.split(' ')[0] || activeUnit.nama}
+                      </span>
+                    </div>
                     <button
                       type="button"
                       className="siska-add-btn"
                       disabled={isOutOfStock || isMaxInCart}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleAddProduct(product);
+                        handleAddProduct(product, activeUnit);
                       }}
-                      title={isOutOfStock ? 'Stok habis' : isMaxInCart ? 'Maksimal stok tercapai' : 'Tambah ke keranjang'}
+                      title={isOutOfStock ? 'Stok habis' : isMaxInCart ? 'Maksimal stok tercapai' : `Tambah ${activeUnit.label || activeUnit.nama} ke keranjang`}
                       style={{
                         opacity: isOutOfStock || isMaxInCart ? 0.5 : 1,
                         cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
                       }}
                     >
-                      {inCart ? (
-                        <span className="siska-incart-badge">{inCart.quantity}</span>
+                      {inCartItem ? (
+                        <span className="siska-incart-badge">{inCartItem.quantity}</span>
                       ) : (
                         '+'
                       )}

@@ -3,6 +3,7 @@
 .siska-cart-sidebar {
   width: 370px;
   min-width: 370px;
+  flex-shrink: 0;
   background-color: #ffffff;
   border-left: 1px solid #e5e7eb;
   height: 100vh;

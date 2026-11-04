@@ -27,15 +27,12 @@ export const CartProvider = ({ children }) => {
       const products = productService.getProducts();
       setCartItems((prevItems) => {
         return prevItems.map((item) => {
+          if (item.isService) return item;
           const fresh = products.find((p) => p.id === item.id);
           if (fresh) {
             return {
               ...item,
-              nama: fresh.nama,
-              kategori: fresh.kategori,
-              harga: fresh.harga,
               stok: fresh.stok,
-              quantity: Math.min(item.quantity, fresh.stok > 0 ? fresh.stok : 1),
             };
           }
           return item;
@@ -47,32 +44,68 @@ export const CartProvider = ({ children }) => {
     return () => window.removeEventListener('siska_products_updated', syncWithProducts);
   }, []);
 
-  const addToCart = (product, quantityToAdd = 1) => {
-    if (product.stok <= 0) return;
+  const addToCart = (product, quantityToAdd = 1, chosenUnit = null) => {
+    const unitName = chosenUnit ? chosenUnit.nama : (product.satuan || 'Pcs');
+    const unitPrice = chosenUnit ? chosenUnit.harga : product.harga;
+    const pengali = chosenUnit ? (chosenUnit.pengali || 1) : (product.pengali || 1);
+    const itemKey = `${product.id}_${unitName}`;
 
     setCartItems((prevItems) => {
-      const existing = prevItems.find((item) => item.id === product.id);
+      // Cek total stok fisik yang sudah terpakai untuk produk ini di keranjang
+      if (!product.isService) {
+        const currentUsage = prevItems
+          .filter((it) => it.id === product.id)
+          .reduce((sum, it) => sum + (it.quantity * (it.pengali || 1)), 0);
+
+        const needed = quantityToAdd * pengali;
+        if (currentUsage + needed > product.stok) {
+          return prevItems; // Stok fisik tidak cukup
+        }
+      }
+
+      const existing = prevItems.find((item) => (item.itemKey || item.id) === itemKey);
       if (existing) {
-        const newQty = existing.quantity + quantityToAdd;
-        if (newQty > product.stok) return prevItems;
         return prevItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: newQty }
+          (item.itemKey || item.id) === itemKey
+            ? { ...item, quantity: item.quantity + quantityToAdd }
             : item
         );
       }
-      return [...prevItems, { ...product, quantity: Math.min(quantityToAdd, product.stok) }];
+
+      const newItem = {
+        ...product,
+        itemKey,
+        satuan: unitName,
+        harga: unitPrice,
+        pengali,
+        quantity: quantityToAdd,
+      };
+
+      return [...prevItems, newItem];
     });
   };
 
-  const updateQuantity = (productId, delta) => {
+  const updateQuantity = (itemKeyOrId, delta) => {
     setCartItems((prevItems) => {
+      const targetItem = prevItems.find((it) => (it.itemKey || it.id) === itemKeyOrId);
+      if (!targetItem) return prevItems;
+
+      if (delta > 0 && !targetItem.isService) {
+        const currentUsage = prevItems
+          .filter((it) => it.id === targetItem.id)
+          .reduce((sum, it) => sum + (it.quantity * (it.pengali || 1)), 0);
+
+        const needed = delta * (targetItem.pengali || 1);
+        if (currentUsage + needed > targetItem.stok) {
+          return prevItems; // Tidak boleh melebihi sisa stok fisik
+        }
+      }
+
       return prevItems
         .map((item) => {
-          if (item.id === productId) {
+          if ((item.itemKey || item.id) === itemKeyOrId) {
             const newQty = item.quantity + delta;
             if (newQty <= 0) return null;
-            if (newQty > item.stok) return item;
             return { ...item, quantity: newQty };
           }
           return item;
@@ -81,8 +114,8 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+  const removeFromCart = (itemKeyOrId) => {
+    setCartItems((prevItems) => prevItems.filter((item) => (item.itemKey || item.id) !== itemKeyOrId));
   };
 
   const clearCart = () => {

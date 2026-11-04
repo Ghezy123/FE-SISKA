@@ -6,13 +6,18 @@ export const initialProducts = [
     id: 'prd_01',
     nama: 'Kertas HVS A4 80gsm',
     kategori: 'Kertas',
-    hargaBeli: 48000,
-    harga: 55000,
-    stok: 12,
-    stok_minimal: 5,
-    satuan: 'Rim',
+    hargaBeli: 200,
+    harga: 300,
+    stok: 5000,
+    stok_minimal: 500,
+    satuan: 'Lembar',
     kode: 'ATK-001',
     status_aktif: 1,
+    satuan_opsi: [
+      { tier: 1, nama: 'Lembar', namaSatuan: 'Lembar', pengali: 1, harga: 300, label: 'Ecer (1 Lembar)' },
+      { tier: 2, nama: 'Rim', namaSatuan: 'Rim', pengali: 500, harga: 55000, label: 'Rim (isi 500 Lembar)' },
+      { tier: 3, nama: 'Box', namaSatuan: 'Box', pengali: 2500, harga: 260000, label: 'Box (5 Rim / 2500 Lembar)' },
+    ],
   },
   {
     id: 'prd_02',
@@ -20,11 +25,16 @@ export const initialProducts = [
     kategori: 'Alat Tulis',
     hargaBeli: 1800,
     harga: 3000,
-    stok: 4,
-    stok_minimal: 10,
+    stok: 144,
+    stok_minimal: 24,
     satuan: 'Pcs',
     kode: 'ATK-002',
     status_aktif: 1,
+    satuan_opsi: [
+      { tier: 1, nama: 'Pcs', namaSatuan: 'Pcs', pengali: 1, harga: 3000, label: 'Ecer (1 Pcs)' },
+      { tier: 2, nama: 'Pack', namaSatuan: 'Pack', pengali: 12, harga: 33000, label: 'Pack (isi 12 Pcs)' },
+      { tier: 3, nama: 'Dus', namaSatuan: 'Dus', pengali: 144, harga: 380000, label: 'Dus (12 Pack / 144 Pcs)' },
+    ],
   },
   {
     id: 'prd_03',
@@ -32,23 +42,32 @@ export const initialProducts = [
     kategori: 'Buku',
     hargaBeli: 3500,
     harga: 5000,
-    stok: 24,
-    stok_minimal: 10,
+    stok: 100,
+    stok_minimal: 20,
     satuan: 'Buku',
     kode: 'ATK-003',
     status_aktif: 1,
+    satuan_opsi: [
+      { tier: 1, nama: 'Buku', namaSatuan: 'Buku', pengali: 1, harga: 5000, label: 'Ecer (1 Buku)' },
+      { tier: 2, nama: 'Pack', namaSatuan: 'Pack', pengali: 10, harga: 45000, label: 'Pack (isi 10 Buku)' },
+      { tier: 3, nama: 'Karton', namaSatuan: 'Karton', pengali: 100, harga: 420000, label: 'Karton (10 Pack / 100 Buku)' },
+    ],
   },
   {
     id: 'prd_04',
-    nama: 'Tinta Printer Hitam 100ml',
-    kategori: 'Tinta Printer',
-    hargaBeli: 28000,
-    harga: 35000,
-    stok: 3,
-    stok_minimal: 5,
-    satuan: 'Botol',
+    nama: 'Penghapus Pensil 4B',
+    kategori: 'Alat Tulis',
+    hargaBeli: 2000,
+    harga: 3500,
+    stok: 40,
+    stok_minimal: 10,
+    satuan: 'Pcs',
     kode: 'ATK-004',
     status_aktif: 1,
+    satuan_opsi: [
+      { nama: 'Pcs', pengali: 1, harga: 3500, label: 'Ecer (1 Pcs)' },
+      { nama: 'Kotak (20 Pcs)', pengali: 20, harga: 60000, label: 'Borongan (Kotak isi 20)' },
+    ],
   },
   {
     id: 'prd_05',
@@ -56,11 +75,15 @@ export const initialProducts = [
     kategori: 'Arsip',
     hargaBeli: 2500,
     harga: 4000,
-    stok: 8,
+    stok: 15,
     stok_minimal: 10,
     satuan: 'Pcs',
     kode: 'ATK-005',
     status_aktif: 1,
+    satuan_opsi: [
+      { nama: 'Pcs', pengali: 1, harga: 4000, label: 'Ecer (1 Pcs)' },
+      { nama: 'Lusin (12 Pcs)', pengali: 12, harga: 44000, label: 'Borongan (Lusin isi 12)' },
+    ],
   },
   {
     id: 'prd_06',
@@ -68,11 +91,15 @@ export const initialProducts = [
     kategori: 'Alat Tulis',
     hargaBeli: 2500,
     harga: 4000,
-    stok: 16,
+    stok: 24,
     stok_minimal: 12,
     satuan: 'Pcs',
     kode: 'ATK-006',
     status_aktif: 1,
+    satuan_opsi: [
+      { nama: 'Pcs', pengali: 1, harga: 4000, label: 'Ecer (1 Pcs)' },
+      { nama: 'Lusin (12 Pcs)', pengali: 12, harga: 44000, label: 'Borongan (Lusin isi 12)' },
+    ],
   },
   {
     id: 'prd_07',
@@ -80,11 +107,15 @@ export const initialProducts = [
     kategori: 'Alat Tulis',
     hargaBeli: 6500,
     harga: 9000,
-    stok: 9,
+    stok: 20,
     stok_minimal: 10,
     satuan: 'Pcs',
     kode: 'ATK-007',
     status_aktif: 1,
+    satuan_opsi: [
+      { nama: 'Pcs', pengali: 1, harga: 9000, label: 'Ecer (1 Pcs)' },
+      { nama: 'Lusin (12 Pcs)', pengali: 12, harga: 100000, label: 'Borongan (Lusin isi 12)' },
+    ],
   },
   {
     id: 'prd_08',
@@ -92,11 +123,15 @@ export const initialProducts = [
     kategori: 'Perekat',
     hargaBeli: 5000,
     harga: 7500,
-    stok: 14,
+    stok: 18,
     stok_minimal: 8,
     satuan: 'Pcs',
     kode: 'ATK-008',
     status_aktif: 1,
+    satuan_opsi: [
+      { nama: 'Pcs', pengali: 1, harga: 7500, label: 'Ecer (1 Pcs)' },
+      { nama: 'Pack (6 Pcs)', pengali: 6, harga: 40000, label: 'Borongan (Pack isi 6)' },
+    ],
   },
 ];
 
@@ -117,7 +152,23 @@ export const productService = {
             const stok = Number(p.stok) || 0;
             const stokMin = p.stok_minimal !== undefined ? Number(p.stok_minimal) : 5;
             const statusAktif = p.status_aktif !== undefined ? p.status_aktif : 1;
-            const kategori = p.kategori || p.nama_kategori || 'Alat Tulis';
+            
+            // Hapus kategori Tinta Printer: jika ada data lama, otomatis pindahkan ke Lainnya/Alat Tulis
+            let kategori = p.kategori || p.nama_kategori || 'Alat Tulis';
+            if (kategori === 'Tinta Printer') {
+              kategori = 'Alat Tulis';
+            }
+
+            // Opsi satuan jual (Eceran & Borongan / Grosir - Mendukung hingga 3 Tingkatan)
+            const matchedInit = initialProducts.find((init) => init.id === id);
+            const rawOpsi = p.satuan_opsi || matchedInit?.satuan_opsi || [
+              { tier: 1, nama: satuan, namaSatuan: satuan, pengali: 1, harga: hargaJual, label: `Ecer (${satuan})` }
+            ];
+            const satuanOpsi = rawOpsi.map((opt, oIdx) => ({
+              ...opt,
+              tier: opt.tier || (oIdx + 1),
+              namaSatuan: opt.namaSatuan || opt.nama?.split(' ')[0] || satuan,
+            }));
 
             return {
               // Standar SRS (Tabel products)
@@ -131,6 +182,7 @@ export const productService = {
               satuan,
               status_aktif: statusAktif,
               nama_kategori: kategori,
+              satuan_opsi: satuanOpsi,
 
               // Alias kompatibilitas frontend
               id,
@@ -164,19 +216,24 @@ export const productService = {
   },
 
   // Kurangi stok saat checkout transaksi kasir & catat log penjualan
+  // Mendukung satuan ecer & borongan (pengali dihitung secara proporsional)
   kurangiStok: (cartItems, user = 'Petugas Toko') => {
     const current = productService.getProducts();
     const updated = current.map((p) => {
-      const itemDibeli = cartItems.find((c) => c.id === p.id);
-      if (itemDibeli) {
-        const stokBaru = Math.max(0, p.stok - itemDibeli.quantity);
+      // Hitung akumulasi stok dasar yang dibeli untuk produk p (quantity * pengali)
+      const totalDibeli = cartItems
+        .filter((c) => c.id === p.id)
+        .reduce((sum, c) => sum + (c.quantity * (c.pengali || 1)), 0);
+
+      if (totalDibeli > 0) {
+        const stokBaru = Math.max(0, p.stok - totalDibeli);
         stockLogService.addLog({
           id_barang: p.id,
           nama_barang: p.nama,
           jenis: 'penjualan',
-          jumlah: -itemDibeli.quantity,
+          jumlah: -totalDibeli,
           harga_beli: p.hargaBeli,
-          catatan: `Penjualan kasir (${itemDibeli.quantity} ${p.satuan || 'unit'})`,
+          catatan: `Penjualan kasir (${totalDibeli} ${p.satuan || 'unit'})`,
           user,
         });
         return {

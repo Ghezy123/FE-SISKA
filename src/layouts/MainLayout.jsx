@@ -7,7 +7,7 @@ export const MainLayout = ({ activePage, onNavigate, onCheckout, children }) => 
   const [sidebarOpen] = useState(true);
 
   return (
-    <div className="siska-pos-shell">
+    <div className={`siska-pos-shell ${activePage === 'kasir' ? 'kasir-mode' : ''}`}>
       {/* Kolom 1: Navigasi Sidebar */}
       <Sidebar
         activePage={activePage}

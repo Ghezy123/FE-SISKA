@@ -42,58 +42,66 @@ export const CartSidebar = ({ onCheckout }) => {
           </div>
         ) : (
           <div className="siska-cart-items-list">
-            {cartItems.map((item) => (
-              <div key={item.id} className="siska-cart-item">
-                <div className="siska-cart-item-info">
-                  <span className="siska-cart-item-name">{item.nama}</span>
-                  <span className="siska-cart-item-price">
-                    {formatRupiah(item.harga)}{item.satuan ? ` / ${item.satuan}` : ''}
-                  </span>
-                </div>
+            {cartItems.map((item) => {
+              const itemKey = item.itemKey || item.id;
+              const totalPhysicalUsed = cartItems
+                .filter((c) => c.id === item.id)
+                .reduce((sum, c) => sum + (c.quantity * (c.pengali || 1)), 0);
+              const isMaxStock = !item.isService && (totalPhysicalUsed + (item.pengali || 1) > item.stok);
 
-                <div className="siska-cart-item-bottom">
-                  {/* Quantity Controls */}
-                  <div className="siska-qty-controls">
-                    <button
-                      type="button"
-                      className="siska-qty-btn"
-                      onClick={() => updateQuantity(item.id, -1)}
-                      title="Kurangi"
-                    >
-                      −
-                    </button>
-                    <span className="siska-qty-number">{item.quantity}</span>
-                    <button
-                      type="button"
-                      className="siska-qty-btn"
-                      disabled={item.quantity >= item.stok}
-                      onClick={() => updateQuantity(item.id, 1)}
-                      title="Tambah"
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  {/* Subtotal & Delete */}
-                  <div className="siska-cart-item-subtotal-wrap">
-                    <span className="siska-cart-item-subtotal">
-                      {formatRupiah(item.harga * item.quantity)}
+              return (
+                <div key={itemKey} className="siska-cart-item">
+                  <div className="siska-cart-item-info">
+                    <span className="siska-cart-item-name">{item.nama}</span>
+                    <span className="siska-cart-item-price">
+                      {formatRupiah(item.harga)}{item.satuan ? ` / ${item.satuan}` : ''}
                     </span>
-                    <button
-                      type="button"
-                      className="siska-item-remove-btn"
-                      onClick={() => removeFromCart(item.id)}
-                      title="Hapus barang"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      </svg>
-                    </button>
+                  </div>
+
+                  <div className="siska-cart-item-bottom">
+                    {/* Quantity Controls */}
+                    <div className="siska-qty-controls">
+                      <button
+                        type="button"
+                        className="siska-qty-btn"
+                        onClick={() => updateQuantity(itemKey, -1)}
+                        title="Kurangi"
+                      >
+                        −
+                      </button>
+                      <span className="siska-qty-number">{item.quantity}</span>
+                      <button
+                        type="button"
+                        className="siska-qty-btn"
+                        disabled={isMaxStock}
+                        onClick={() => updateQuantity(itemKey, 1)}
+                        title="Tambah"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Subtotal & Delete */}
+                    <div className="siska-cart-item-subtotal-wrap">
+                      <span className="siska-cart-item-subtotal">
+                        {formatRupiah(item.harga * item.quantity)}
+                      </span>
+                      <button
+                        type="button"
+                        className="siska-item-remove-btn"
+                        onClick={() => removeFromCart(itemKey)}
+                        title="Hapus barang"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

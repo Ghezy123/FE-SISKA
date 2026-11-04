@@ -9,9 +9,14 @@ export const ToastProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const addToast = useCallback((message, type = 'info', duration = 3500) => {
+  const addToast = useCallback((message, type = 'info', duration = 2500) => {
     const id = `toast_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    setToasts((prev) => [...prev, { id, message, type }]);
+    
+    setToasts((prev) => {
+      // Maksimal 3 notif: jika muncul notif ke-4, notif pertama otomatis dibuang agar tidak menumpuk
+      const trimmed = prev.length >= 3 ? prev.slice(prev.length - 2) : prev;
+      return [...trimmed, { id, message, type }];
+    });
 
     if (duration > 0) {
       setTimeout(() => {
@@ -28,6 +33,27 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={{ addToast, success, error, warning, info }}>
       {children}
+      {/* Toast Keyframes Animation */}
+      <style>{`
+        @keyframes toastSlideInSmooth {
+          0% {
+            opacity: 0;
+            transform: translateX(35px) scale(0.94);
+          }
+          60% {
+            opacity: 1;
+            transform: translateX(-4px) scale(1.01);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+        .siska-toast-item {
+          animation: toastSlideInSmooth 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transition: all 0.25s ease;
+        }
+      `}</style>
       {/* Toast Container */}
       <div style={{
         position: 'fixed',
@@ -62,22 +88,22 @@ export const ToastProvider = ({ children }) => {
           return (
             <div
               key={t.id}
+              className="siska-toast-item"
               style={{
                 pointerEvents: 'auto',
                 background: bg,
                 border: `1px solid ${border}`,
                 color: '#ffffff',
                 padding: '12px 18px',
-                borderRadius: '10px',
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
+                borderRadius: '12px',
+                boxShadow: '0 12px 30px -6px rgba(0,0,0,0.25), 0 4px 10px -2px rgba(0,0,0,0.15)',
                 fontSize: '14px',
                 fontWeight: '600',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
                 minWidth: '260px',
-                maxWidth: '400px',
-                animation: 'slideInRight 0.25s ease-out',
+                maxWidth: '380px',
               }}
             >
               <span style={{ fontSize: '16px' }}>{icon}</span>
