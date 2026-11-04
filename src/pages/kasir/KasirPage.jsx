@@ -7,6 +7,8 @@ import { formatRupiah } from '../../utils/helpers';
 import CurrencyInput from '../../components/common/CurrencyInput';
 import './KasirPage.css';
 
+const ATK_ITEMS_PER_PAGE = 8;
+
 export const KasirPage = () => {
   const { warning, success } = useToast();
   const [products, setProducts] = useState([]);
@@ -14,7 +16,8 @@ export const KasirPage = () => {
   const [activeTab, setActiveTab] = useState('atk'); // 'atk' | 'cetak'
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
   const [searchQuery, setSearchQuery] = useState('');
-  const [serviceQty, setServiceQty] = useState({}); // { srv_id: qty }
+  const [currentPage, setCurrentPage] = useState(1);
+  const [serviceNominal, setServiceNominal] = useState({}); // { [srv.id]: nominalBayar }
   const [selectedUnits, setSelectedUnits] = useState({}); // { [productId]: chosenUnitOption }
   const { addToCart, cartItems } = useCart();
 
@@ -73,6 +76,19 @@ export const KasirPage = () => {
     });
   }, [products, selectedCategory, searchQuery]);
 
+  // Reset pagination ke halaman 1 setiap kali kategori atau pencarian berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ATK_ITEMS_PER_PAGE));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (validCurrentPage - 1) * ATK_ITEMS_PER_PAGE;
+    return filteredProducts.slice(start, start + ATK_ITEMS_PER_PAGE);
+  }, [filteredProducts, validCurrentPage]);
+
   // Tanggal Hari Ini Sesuai Format Lokal
   const todayFormatted = useMemo(() => {
     return new Intl.DateTimeFormat('id-ID', {
@@ -106,9 +122,9 @@ export const KasirPage = () => {
   };
 
   const handleAddService = (srv) => {
-    const qty = Number(serviceQty[srv.id]) || 1;
-    if (qty <= 0) {
-      warning('Jumlah lembar/buku minimal 1');
+    const nominal = Number(serviceNominal[srv.id]);
+    if (!nominal || nominal <= 0) {
+      warning(`Masukkan nominal total pembayaran untuk ${srv.nama}`);
       return;
     }
     addToCart(
@@ -116,16 +132,16 @@ export const KasirPage = () => {
         id: srv.id,
         nama: srv.nama,
         kategori: srv.kategori,
-        harga: srv.harga,
-        satuan: srv.satuan || 'lembar',
+        harga: nominal,
+        satuan: '',
         stok: 999999,
         isService: true,
       },
-      qty
+      1
     );
-    success(`${srv.nama} (${qty} ${srv.satuan || 'lembar'}) ditambahkan ke keranjang`);
-    // Reset qty
-    setServiceQty((prev) => ({ ...prev, [srv.id]: 1 }));
+    success(`${srv.nama} (${formatRupiah(nominal)}) ditambahkan ke keranjang`);
+    // Kosongkan kembali input setelah ditambahkan
+    setServiceNominal((prev) => ({ ...prev, [srv.id]: '' }));
   };
 
   return (
@@ -178,7 +194,7 @@ export const KasirPage = () => {
           </div>
           <div className="siska-mode-info">
             <span className="siska-mode-title">Layanan Cetak & Jasa</span>
-            <span className="siska-mode-sub">Hitung print, fotokopi, laminating, jilid</span>
+            <span className="siska-mode-sub">Print, fotokopi, laminating</span>
           </div>
         </button>
       </div>
@@ -227,7 +243,7 @@ export const KasirPage = () => {
 
           {/* Product Grid */}
           <div className="siska-products-grid">
-            {filteredProducts.map((product) => {
+            {paginatedProducts.map((product) => {
               const activeUnit = getActiveUnit(product);
               const currentUsed = cartItems
                 .filter((i) => i.id === product.id)
@@ -329,77 +345,150 @@ export const KasirPage = () => {
               );
             })}
           </div>
+
+          {/* Pagination ATK (Muncul jika barang lebih dari batas tertentu / ATK_ITEMS_PER_PAGE) */}
+          {totalPages > 1 && (
+            <div className="siska-atk-pagination">
+              <span className="siska-pagination-info">
+                Menampilkan <strong>{(validCurrentPage - 1) * ATK_ITEMS_PER_PAGE + 1}</strong>-<strong>{Math.min(validCurrentPage * ATK_ITEMS_PER_PAGE, filteredProducts.length)}</strong> dari <strong>{filteredProducts.length}</strong> barang
+              </span>
+              <div className="siska-pagination-controls">
+                <button
+                  type="button"
+                  className="siska-page-btn siska-page-nav-btn"
+                  disabled={validCurrentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  aria-label="Halaman sebelumnya"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  <span>Prev</span>
+                </button>
+
+                <div className="siska-page-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`siska-page-btn siska-page-num ${n === validCurrentPage ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="siska-page-btn siska-page-nav-btn"
+                  disabled={validCurrentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  aria-label="Halaman berikutnya"
+                >
+                  <span>Next</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </>
       ) : (
-        /* Kalkulator Layanan Cetak & Jasa (SRS Tabel 4 & Frame 6:1403) */
+        /* Layanan Cetak & Jasa (3 Opsi: Print, Fotokopi, Laminating - Langsung Masukkan Total Nominal) */
         <div className="siska-layanan-cetak-panel">
-          <div className="siska-layanan-cetak-header">
-            <h2>Kalkulator Layanan Cetak & Jasa (Alya Fotocopy)</h2>
-            <p>Masukkan jumlah lembar, halaman, atau buku untuk kalkulasi biaya instan ke kasir.</p>
+          <div className="siska-layanan-header-v4">
+            <h2>Layanan Cetak & Jasa (Alya Fotocopy)</h2>
+            <p>Pilih layanan, masukkan nominal total pembayaran pelanggan, lalu klik tambah ke keranjang.</p>
           </div>
-          <div className="siska-layanan-cards">
+
+          <div className="siska-layanan-grid-pure">
             {services.map((srv) => {
-              const currentQty = serviceQty[srv.id] || 1;
-              const subtotalCalc = srv.harga * currentQty;
+              const currentNominal = serviceNominal[srv.id] || '';
+              const numVal = Number(currentNominal) || 0;
+
+              const presets =
+                srv.id === 'srv_fotokopi'
+                  ? [500, 1000, 2000, 3000, 5000, 10000]
+                  : srv.id === 'srv_laminating'
+                  ? [2000, 4000, 5000, 8000, 10000, 20000]
+                  : [500, 1000, 2000, 5000, 10000, 20000];
 
               return (
-                <div key={srv.id} className="siska-service-option">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase' }}>
-                        {srv.kategori}
-                      </span>
-                      <h3 style={{ margin: '4px 0 2px' }}>{srv.nama}</h3>
-                      <p style={{ margin: 0, color: '#64748b', fontSize: '13px' }}>
-                        {formatRupiah(srv.harga)} / {srv.satuan}
-                      </p>
+                <div key={srv.id} className="siska-service-pure-card">
+                  {/* Card Header */}
+                  <div className="siska-service-pure-top">
+                    <div className={`siska-service-pure-icon icon-${srv.id}`}>
+                      {srv.id === 'srv_print' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 6 2 18 2 18 9" />
+                          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                          <rect x="6" y="14" width="12" height="8" />
+                        </svg>
+                      )}
+                      {srv.id === 'srv_fotokopi' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      )}
+                      {srv.id === 'srv_laminating' && (
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                          <path d="M2 17l10 5 10-5" />
+                          <path d="M2 12l10 5 10-5" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="siska-service-pure-info">
+                      <span className="siska-service-pure-cat">{srv.kategori}</span>
+                      <h3 className="siska-service-pure-title">{srv.nama}</h3>
+                      <span className="siska-service-pure-desc">{srv.deskripsi}</span>
                     </div>
                   </div>
 
-                  <div style={{
-                    marginTop: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    background: '#f8fafc',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #e2e8f0',
-                  }}>
-                    <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>
-                      Jumlah ({srv.satuan}):
-                    </label>
-                    <CurrencyInput
-                      min={1}
-                      value={currentQty}
-                      onChange={(raw) => {
-                        const val = Math.max(1, raw || 1);
-                        setServiceQty((prev) => ({ ...prev, [srv.id]: val }));
-                      }}
-                      style={{
-                        width: '70px',
-                        height: '32px',
-                        padding: '0 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        textAlign: 'center',
-                      }}
-                    />
-                    <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                      <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Subtotal:</span>
-                      <strong style={{ fontSize: '14px', color: '#0f172a' }}>{formatRupiah(subtotalCalc)}</strong>
+                  {/* Input Nominal Total Bayar */}
+                  <div className="siska-service-pure-input-section">
+                    <label className="siska-service-pure-label">Nominal Total Bayar</label>
+                    <div className="siska-service-pure-input-wrapper">
+                      <span className="siska-service-pure-prefix">Rp</span>
+                      <CurrencyInput
+                        className="siska-service-pure-input"
+                        value={currentNominal}
+                        onChange={(raw) => setServiceNominal((prev) => ({ ...prev, [srv.id]: raw }))}
+                        placeholder="0"
+                        min={0}
+                      />
+                    </div>
+
+                    {/* Quick Preset Chips */}
+                    <div className="siska-service-pure-chips">
+                      {presets.map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          className={`siska-service-pure-chip ${numVal === amt ? 'active' : ''}`}
+                          onClick={() => setServiceNominal((prev) => ({ ...prev, [srv.id]: amt }))}
+                        >
+                          {formatRupiah(amt)}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
+                  {/* Button Tambah ke Keranjang */}
                   <button
                     type="button"
-                    className="siska-add-service-btn"
-                    style={{ marginTop: '12px' }}
+                    className="siska-service-pure-btn"
+                    disabled={numVal <= 0}
                     onClick={() => handleAddService(srv)}
                   >
-                    + Tambah ke Keranjang
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>Tambah ke Keranjang</span>
                   </button>
                 </div>
               );

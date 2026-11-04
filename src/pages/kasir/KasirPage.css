@@ -403,64 +403,316 @@
   justify-content: center;
 }
 
-/* Layanan Cetak */
+/* ─── Layanan Cetak & Jasa (3 Opsi: Print, Fotokopi, Laminating) ─── */
 .siska-layanan-cetak-panel {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.siska-layanan-cetak-header h2 {
-  font-size: 18px;
-  margin: 0 0 6px 0;
+.siska-layanan-header-v4 {
+  margin-bottom: 16px;
 }
-.siska-layanan-cetak-header p {
+
+.siska-layanan-header-v4 h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.siska-layanan-header-v4 p {
   color: #6b7280;
   font-size: 13px;
-  margin: 0 0 20px 0;
+  margin: 0;
 }
 
-.siska-layanan-cards {
+/* Grid bergaya seperti barang ATK: mengalir rapi ke bawah tanpa overflow ke samping */
+.siska-layanan-grid-pure {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.siska-service-option {
+.siska-service-pure-card {
+  background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 18px;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
-.siska-service-option:hover {
+
+.siska-service-pure-card:hover {
   border-color: #2563eb;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
 }
-.siska-service-option h3 {
-  font-size: 14px;
-  margin: 0 0 6px 0;
+
+.siska-service-pure-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
-.siska-service-option p {
-  font-size: 14px;
-  font-weight: 700;
-  color: #2563eb;
-  margin: 0 0 14px 0;
+
+.siska-service-pure-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.siska-add-service-btn {
-  width: 100%;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #2563eb;
+
+.siska-service-pure-icon.icon-srv_print {
   background: #eff6ff;
   color: #2563eb;
-  font-weight: 600;
+}
+
+.siska-service-pure-icon.icon-srv_fotokopi {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.siska-service-pure-icon.icon-srv_laminating {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.siska-service-pure-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.siska-service-pure-cat {
+  font-size: 9px;
+  font-weight: 800;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.siska-service-pure-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px 0;
+}
+
+.siska-service-pure-desc {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+.siska-service-pure-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.siska-service-pure-label {
   font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.siska-service-pure-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 42px;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.siska-service-pure-input-wrapper:focus-within {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.siska-service-pure-prefix {
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+  margin-right: 6px;
+  user-select: none;
+}
+
+.siska-service-pure-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: inherit;
+}
+
+.siska-service-pure-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.siska-service-pure-chip {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
 }
-.siska-add-service-btn:hover {
+
+.siska-service-pure-chip:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #2563eb;
+}
+
+.siska-service-pure-chip.active {
   background: #2563eb;
-  color: white;
+  border-color: #2563eb;
+  color: #ffffff;
 }
+
+.siska-service-pure-btn {
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+  margin-top: 4px;
+  font-family: inherit;
+}
+
+.siska-service-pure-btn:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.siska-service-pure-btn:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   ATK Products Pagination
+   ========================================================================== */
+.siska-atk-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 12px 18px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.siska-pagination-info {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.siska-pagination-info strong {
+  color: #111827;
+  font-weight: 700;
+}
+
+.siska-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.siska-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.siska-page-btn {
+  height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.siska-page-btn.siska-page-num {
+  min-width: 34px;
+  padding: 0 6px;
+}
+
+.siska-page-btn.siska-page-nav-btn {
+  padding: 0 12px;
+}
+
+.siska-page-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.siska-page-btn.active {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.siska-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+}
+
 

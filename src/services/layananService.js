@@ -1,47 +1,26 @@
-// Layanan Cetak dan Jasa Fotokopi (SRS Tabel 4: services)
+// Layanan Cetak dan Jasa Fotokopi (Alya Fotocopy)
+// 3 opsi utama: Print, Fotokopi, Laminating (Kasir langsung menginput nominal total transaksi)
 
 const STORAGE_KEY = 'siska_services';
 
 export const initialServices = [
   {
-    id: 'srv_01',
-    nama: 'Print Hitam Putih (A4)',
+    id: 'srv_print',
+    nama: 'Print',
     kategori: 'Jasa Cetak',
-    satuan: 'lembar',
-    harga: 500,
-    status_aktif: 1,
+    deskripsi: 'Cetak dokumen tulisan, gambar, maupun warna',
   },
   {
-    id: 'srv_02',
-    nama: 'Print Full Warna (A4)',
-    kategori: 'Jasa Cetak',
-    satuan: 'lembar',
-    harga: 1500,
-    status_aktif: 1,
-  },
-  {
-    id: 'srv_03',
-    nama: 'Fotokopi Kertas A4/F4',
+    id: 'srv_fotokopi',
+    nama: 'Fotokopi',
     kategori: 'Fotokopi',
-    satuan: 'lembar',
-    harga: 300,
-    status_aktif: 1,
+    deskripsi: 'Penggandaan berkas & dokumen',
   },
   {
-    id: 'srv_04',
-    nama: 'Jilid Spiral Plastik + Cover',
-    kategori: 'Jilid & Finishing',
-    satuan: 'buku',
-    harga: 7000,
-    status_aktif: 1,
-  },
-  {
-    id: 'srv_05',
-    nama: 'Laminating Dokumen A4',
-    kategori: 'Jilid & Finishing',
-    satuan: 'lembar',
-    harga: 4000,
-    status_aktif: 1,
+    id: 'srv_laminating',
+    nama: 'Laminating',
+    kategori: 'Laminasi',
+    deskripsi: 'Laminasi pelindung dokumen & piagam',
   },
 ];
 
@@ -51,7 +30,11 @@ export const layananService = {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        const isNewFormat =
+          Array.isArray(parsed) &&
+          parsed.length === 3 &&
+          parsed.some((s) => s.id === 'srv_print');
+        if (isNewFormat) return parsed;
       }
     } catch {
       // fallback
@@ -65,4 +48,3 @@ export const layananService = {
     window.dispatchEvent(new Event('siska_services_updated'));
   },
 };
-

@@ -45,10 +45,10 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   const addToCart = (product, quantityToAdd = 1, chosenUnit = null) => {
-    const unitName = chosenUnit ? chosenUnit.nama : (product.satuan || 'Pcs');
+    const unitName = chosenUnit ? chosenUnit.nama : (product.isService ? '' : (product.satuan || 'Pcs'));
     const unitPrice = chosenUnit ? chosenUnit.harga : product.harga;
     const pengali = chosenUnit ? (chosenUnit.pengali || 1) : (product.pengali || 1);
-    const itemKey = `${product.id}_${unitName}`;
+    const itemKey = product.isService ? `${product.id}_${unitPrice}` : `${product.id}_${unitName}`;
 
     setCartItems((prevItems) => {
       // Cek total stok fisik yang sudah terpakai untuk produk ini di keranjang
