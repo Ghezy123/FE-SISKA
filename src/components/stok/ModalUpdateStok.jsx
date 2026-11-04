@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
+import CurrencyInput from '../common/CurrencyInput';
 import './StokModals.css';
 
 /**
@@ -134,16 +135,15 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
               </div>
             )}
 
-            {/* Input Jumlah Ditambah */}
+            {/* Input Jumlah Ditambah — menggunakan CurrencyInput agar tampil dengan titik ribuan */}
             <div className="form-field">
               <label className="form-label">Jumlah {tierName} yang Ditambah</label>
-              <input
+              <CurrencyInput
                 className="form-input"
-                type="number"
+                min={1}
                 value={tambah}
-                onChange={(e) => setTambah(e.target.value)}
+                onChange={(raw) => setTambah(raw)}
                 placeholder="Contoh: 2"
-                min="1"
                 required
                 autoFocus
               />

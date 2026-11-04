@@ -4,6 +4,7 @@ import { layananService } from '../../services/layananService';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { formatRupiah } from '../../utils/helpers';
+import CurrencyInput from '../../components/common/CurrencyInput';
 import './KasirPage.css';
 
 export const KasirPage = () => {
@@ -368,12 +369,11 @@ export const KasirPage = () => {
                     <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>
                       Jumlah ({srv.satuan}):
                     </label>
-                    <input
-                      type="number"
-                      min="1"
+                    <CurrencyInput
+                      min={1}
                       value={currentQty}
-                      onChange={(e) => {
-                        const val = Math.max(1, parseInt(e.target.value) || 1);
+                      onChange={(raw) => {
+                        const val = Math.max(1, raw || 1);
                         setServiceQty((prev) => ({ ...prev, [srv.id]: val }));
                       }}
                       style={{

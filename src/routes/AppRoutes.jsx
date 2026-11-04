@@ -11,6 +11,7 @@ import { formatRupiah } from '../utils/helpers';
 import { productService } from '../services/productService';
 import { transaksiService } from '../services/transaksiService';
 import { StrukThermal } from '../components/common/StrukThermal';
+import CurrencyInput from '../components/common/CurrencyInput';
 
 export const AppRoutes = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -248,10 +249,9 @@ export const AppRoutes = () => {
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '6px' }}>
                     Uang Diterima
                   </label>
-                  <input
-                    type="number"
+                  <CurrencyInput
                     value={uangDiterima}
-                    onChange={(e) => setUangDiterima(e.target.value)}
+                    onChange={(raw) => setUangDiterima(raw)}
                     placeholder="Masukkan nominal uang"
                     style={{
                       width: '100%',

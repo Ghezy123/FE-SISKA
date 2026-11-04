@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CurrencyInput from '../common/CurrencyInput';
 import './StokModals.css';
 
 /**
@@ -136,13 +137,12 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
             {/* Harga Beli */}
             <div className="form-field">
               <label className="form-label">Harga Beli / Modal</label>
-              <input
+              <CurrencyInput
                 className="form-input"
-                type="number"
                 value={hargaBeli}
-                onChange={(e) => setHargaBeli(e.target.value)}
+                onChange={(raw) => setHargaBeli(raw)}
                 placeholder="Rp 20.000"
-                min="0"
+                min={0}
               />
             </div>
 
@@ -159,13 +159,12 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
                 </div>
                 <div className="form-field">
                   <label className="form-label">Harga Jual Eceran</label>
-                  <input
+                  <CurrencyInput
                     className="form-input"
-                    type="number"
                     value={harga}
-                    onChange={(e) => setHarga(e.target.value)}
+                    onChange={(raw) => setHarga(raw)}
                     placeholder="Contoh: 300 / 3000"
-                    min="0"
+                    min={0}
                     required
                   />
                 </div>
@@ -198,25 +197,23 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
                     </div>
                     <div className="form-field">
                       <label className="form-label">Isi per {tier2.nama || 'Pack'} ({product.satuan || 'Pcs'})</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="2"
+                        min={2}
                         value={tier2.pengali}
-                        onChange={(e) => setTier2({ ...tier2, pengali: e.target.value })}
+                        onChange={(raw) => setTier2({ ...tier2, pengali: raw })}
                         placeholder="Contoh: 500 / 12"
                         required
                       />
                     </div>
                     <div className="form-field">
                       <label className="form-label">Harga Jual</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="0"
                         value={tier2.harga}
-                        onChange={(e) => setTier2({ ...tier2, harga: e.target.value })}
+                        onChange={(raw) => setTier2({ ...tier2, harga: raw })}
                         placeholder="Contoh: 55000"
+                        min={0}
                         required
                       />
                     </div>
@@ -251,25 +248,23 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
                     </div>
                     <div className="form-field">
                       <label className="form-label">Total Isi per {tier3.nama || 'Box'} ({product.satuan || 'Pcs'})</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="2"
+                        min={2}
                         value={tier3.pengali}
-                        onChange={(e) => setTier3({ ...tier3, pengali: e.target.value })}
+                        onChange={(raw) => setTier3({ ...tier3, pengali: raw })}
                         placeholder="Contoh: 2500 / 144"
                         required
                       />
                     </div>
                     <div className="form-field">
                       <label className="form-label">Harga Jual</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="0"
                         value={tier3.harga}
-                        onChange={(e) => setTier3({ ...tier3, harga: e.target.value })}
+                        onChange={(raw) => setTier3({ ...tier3, harga: raw })}
                         placeholder="Contoh: 260000"
+                        min={0}
                         required
                       />
                     </div>

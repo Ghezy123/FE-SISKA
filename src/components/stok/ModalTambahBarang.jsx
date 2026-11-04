@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
+import CurrencyInput from '../common/CurrencyInput';
 import './StokModals.css';
 
 const CATEGORIES = ['Kertas', 'Alat Tulis', 'Buku', 'Arsip', 'Perekat', 'Lainnya'];
@@ -174,14 +175,12 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
               </div>
               <div className="form-field">
                 <label className="form-label">Harga Beli (Modal)</label>
-                <input
+                <CurrencyInput
                   className="form-input"
-                  type="number"
-                  name="hargaBeli"
                   value={form.hargaBeli}
-                  onChange={handleChange}
+                  onChange={(raw) => setForm((prev) => ({ ...prev, hargaBeli: raw }))}
                   placeholder="Rp 20.000"
-                  min="0"
+                  min={0}
                 />
               </div>
             </div>
@@ -207,14 +206,12 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
                   </div>
                   <div className="form-field">
                     <label className="form-label">Harga Jual Eceran</label>
-                    <input
+                    <CurrencyInput
                       className="form-input"
-                      type="number"
-                      name="harga"
                       value={form.harga}
-                      onChange={handleChange}
+                      onChange={(raw) => setForm((prev) => ({ ...prev, harga: raw }))}
                       placeholder="Contoh: 300 / 3000"
-                      min="0"
+                      min={0}
                       required
                     />
                   </div>
@@ -248,25 +245,23 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
                     </div>
                     <div className="form-field">
                       <label className="form-label">Isi per {tier2.nama || 'Pack'} ({form.satuan})</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="2"
+                        min={2}
                         value={tier2.pengali}
-                        onChange={(e) => setTier2({ ...tier2, pengali: e.target.value })}
+                        onChange={(raw) => setTier2({ ...tier2, pengali: raw })}
                         placeholder="Contoh: 500 / 12"
                         required
                       />
                     </div>
                     <div className="form-field">
                       <label className="form-label">Harga Jual</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="0"
                         value={tier2.harga}
-                        onChange={(e) => setTier2({ ...tier2, harga: e.target.value })}
+                        onChange={(raw) => setTier2({ ...tier2, harga: raw })}
                         placeholder="Contoh: 55000"
+                        min={0}
                         required
                       />
                     </div>
@@ -301,25 +296,23 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
                     </div>
                     <div className="form-field">
                       <label className="form-label">Total Isi per {tier3.nama || 'Box'} ({form.satuan})</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="2"
+                        min={2}
                         value={tier3.pengali}
-                        onChange={(e) => setTier3({ ...tier3, pengali: e.target.value })}
+                        onChange={(raw) => setTier3({ ...tier3, pengali: raw })}
                         placeholder="Contoh: 2500 / 144"
                         required
                       />
                     </div>
                     <div className="form-field">
                       <label className="form-label">Harga Jual</label>
-                      <input
+                      <CurrencyInput
                         className="form-input"
-                        type="number"
-                        min="0"
                         value={tier3.harga}
-                        onChange={(e) => setTier3({ ...tier3, harga: e.target.value })}
+                        onChange={(raw) => setTier3({ ...tier3, harga: raw })}
                         placeholder="Contoh: 260000"
+                        min={0}
                         required
                       />
                     </div>
@@ -336,13 +329,12 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
             <div className="modal-body-row">
               <div className="form-field" style={{ flex: 1.2 }}>
                 <label className="form-label">Jumlah Stok Awal</label>
-                <input
+                <CurrencyInput
                   className="form-input"
-                  type="number"
                   value={inputStokQty}
-                  onChange={(e) => setInputStokQty(e.target.value)}
+                  onChange={(raw) => setInputStokQty(raw)}
                   placeholder="0"
-                  min="0"
+                  min={0}
                 />
               </div>
 
@@ -384,13 +376,12 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
 
             <div className="form-field">
               <label className="form-label">Batas Stok Minimal ({form.satuan || 'Pcs'})</label>
-              <input
+              <CurrencyInput
                 className="form-input"
-                type="number"
                 name="stok_minimal"
                 value={form.stok_minimal}
-                onChange={handleChange}
-                min="0"
+                onChange={(raw) => setForm({ ...form, stok_minimal: raw })}
+                min={0}
                 placeholder="10"
               />
             </div>

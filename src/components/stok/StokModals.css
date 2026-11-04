@@ -138,6 +138,18 @@
 
 .form-input::placeholder { color: #9ca3af; }
 
+/* Hilangkan tombol panah spinner scroll angka pada input number */
+.form-input[type="number"]::-webkit-outer-spin-button,
+.form-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.form-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .form-select { appearance: none; cursor: pointer; }
 
 /* ─── Footer ─── */
