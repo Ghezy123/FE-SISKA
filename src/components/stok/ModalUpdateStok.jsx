@@ -11,6 +11,7 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
   const [tambah, setTambah] = useState('');
   const [selectedUnitIdx, setSelectedUnitIdx] = useState(0);
   const [confirmStep, setConfirmStep] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   // Ambil opsi satuan yang dimiliki barang (Tier 1 Ecer, Tier 2 Sedang, Tier 3 Grosir)
   const availableUnits = useMemo(() => {
@@ -33,6 +34,19 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
   const physicalAdded = qtyInput * multiplier;
   const newTotalStock = product.stok + physicalAdded;
   const tierName = selectedTier.namaSatuan || selectedTier.nama?.split(' ')[0] || product.satuan || 'Pcs';
+
+  // Cek apakah user sudah mengisi jumlah restok
+  const isDirty = useMemo(() => {
+    return Boolean(tambah && Number(tambah) > 0);
+  }, [tambah]);
+
+  const handleRequestClose = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+    } else {
+      onClose();
+    }
+  };
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -81,7 +95,7 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={handleRequestClose}>
       <div className="modal-dialog modal-dialog-sm" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="modal-header">
@@ -90,7 +104,7 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
             <h2 className="modal-title">Update Stok (Restok)</h2>
             <p className="modal-subtitle">Tambah stok dalam pilihan satuan ecer atau kemasan borongan.</p>
           </div>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Tutup">
+          <button className="modal-close-btn" onClick={handleRequestClose} aria-label="Tutup">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -163,7 +177,7 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
           </div>
 
           <div className="modal-footer">
-            <button type="button" className="btn-batal" onClick={onClose}>Batal</button>
+            <button type="button" className="btn-batal" onClick={handleRequestClose}>Batal</button>
             <button type="submit" className="btn-simpan">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <polyline points="20 6 9 17 4 12" />
@@ -173,6 +187,47 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
           </div>
         </form>
       </div>
+
+      {/* Modal Validasi Batalkan jika jumlah restok sudah diisi */}
+      {showDiscardConfirm && (
+        <div className="modal-backdrop" style={{ zIndex: 300 }} onClick={() => setShowDiscardConfirm(false)}>
+          <div className="modal-dialog modal-dialog-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-dialog-body">
+              <div className="confirm-icon" style={{ background: '#fef3c7' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <h2 className="confirm-dialog-title">Batalkan Update Stok?</h2>
+              <p className="confirm-dialog-sub">
+                Jumlah stok yang Anda masukkan belum disimpan. Apakah Anda yakin ingin membatalkan?
+              </p>
+            </div>
+            <div className="modal-footer modal-footer-center" style={{ paddingTop: 16 }}>
+              <div className="update-choice-group">
+                <button
+                  type="button"
+                  className="btn-batal"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowDiscardConfirm(false)}
+                >
+                  Lanjut Mengisi
+                </button>
+                <button
+                  type="button"
+                  className="btn-hapus-confirm"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={onClose}
+                >
+                  Ya, Batalkan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

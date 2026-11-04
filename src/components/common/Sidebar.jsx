@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import './Sidebar.css';
 
 export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
   const { user, logout } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const menuItems = [
     {
@@ -89,7 +91,7 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
           </div>
         </div>
 
-        <button type="button" className="siska-logout-btn" onClick={logout}>
+        <button type="button" className="siska-logout-btn" onClick={() => setShowLogoutConfirm(true)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
@@ -98,6 +100,44 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
           <span>Logout</span>
         </button>
       </div>
+
+      {/* Modal Validasi Konfirmasi Logout */}
+      {showLogoutConfirm && (
+        <div className="siska-modal-backdrop" onClick={() => setShowLogoutConfirm(false)}>
+          <div className="siska-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="siska-confirm-icon-wrap siska-icon-danger">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </div>
+            <h3 className="siska-confirm-title">Konfirmasi Keluar</h3>
+            <p className="siska-confirm-desc">
+              Apakah Anda yakin ingin keluar dari akun <strong>{user?.nama || 'Petugas Toko'}</strong>?
+            </p>
+            <div className="siska-confirm-actions">
+              <button
+                type="button"
+                className="siska-confirm-btn-cancel"
+                onClick={() => setShowLogoutConfirm(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="siska-confirm-btn-danger"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  logout();
+                }}
+              >
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

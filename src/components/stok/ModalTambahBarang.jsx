@@ -37,6 +37,28 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
   // Input Stok Awal (Bisa dalam bentuk Tier 1, Tier 2, atau Tier 3)
   const [inputStokQty, setInputStokQty] = useState('');
   const [inputStokTier, setInputStokTier] = useState('tier1');
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  // Periksa apakah user telah memasukkan data pada form
+  const isDirty = useMemo(() => {
+    if (form.nama && form.nama.trim() !== '') return true;
+    if (form.hargaBeli && Number(form.hargaBeli) > 0) return true;
+    if (form.harga && Number(form.harga) > 0) return true;
+    if (form.kategori && form.kategori !== '') return true;
+    if (form.kode && form.kode.trim() !== '') return true;
+    if (inputStokQty && Number(inputStokQty) > 0) return true;
+    if (hasTier2 && (tier2.harga || tier2.nama !== 'Rim' || Number(tier2.pengali) !== 500)) return true;
+    if (hasTier3 && (tier3.harga || tier3.nama !== 'Box' || Number(tier3.pengali) !== 2500)) return true;
+    return false;
+  }, [form, inputStokQty, hasTier2, tier2, hasTier3, tier3]);
+
+  const handleRequestClose = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+    } else {
+      onClose();
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -132,7 +154,7 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={handleRequestClose}>
       <div className="modal-dialog modal-dialog-md" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="modal-header">
@@ -141,7 +163,7 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
             <h2 className="modal-title">Barang Baru</h2>
             <p className="modal-subtitle">Atur identitas barang, 3 tingkatan satuan jual, dan stok awal.</p>
           </div>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Tutup">
+          <button className="modal-close-btn" onClick={handleRequestClose} aria-label="Tutup">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -389,7 +411,7 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
 
           {/* Footer */}
           <div className="modal-footer">
-            <button type="button" className="btn-batal" onClick={onClose}>Batal</button>
+            <button type="button" className="btn-batal" onClick={handleRequestClose}>Batal</button>
             <button type="submit" className="btn-simpan">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <polyline points="20 6 9 17 4 12" />
@@ -399,6 +421,47 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
           </div>
         </form>
       </div>
+
+      {/* Modal Validasi Batalkan jika form sudah terisi */}
+      {showDiscardConfirm && (
+        <div className="modal-backdrop" style={{ zIndex: 300 }} onClick={() => setShowDiscardConfirm(false)}>
+          <div className="modal-dialog modal-dialog-sm" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-dialog-body">
+              <div className="confirm-icon" style={{ background: '#fef3c7' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <h2 className="confirm-dialog-title">Batalkan Tambah Barang?</h2>
+              <p className="confirm-dialog-sub">
+                Data barang yang telah Anda isi belum disimpan. Jika Anda keluar, semua data yang sudah diketik akan hilang.
+              </p>
+            </div>
+            <div className="modal-footer modal-footer-center" style={{ paddingTop: 16 }}>
+              <div className="update-choice-group">
+                <button
+                  type="button"
+                  className="btn-batal"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowDiscardConfirm(false)}
+                >
+                  Lanjut Mengisi
+                </button>
+                <button
+                  type="button"
+                  className="btn-hapus-confirm"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={onClose}
+                >
+                  Ya, Batalkan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
