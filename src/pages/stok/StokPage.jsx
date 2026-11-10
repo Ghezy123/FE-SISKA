@@ -12,7 +12,7 @@ import './StokPage.css';
 const ITEMS_PER_PAGE = 8;
 
 const StokPage = () => {
-  const { success } = useToast();
+  const { success, error: toastError } = useToast();
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [filterKategori, setFilterKategori] = useState('Semua Kategori');
@@ -31,6 +31,7 @@ const StokPage = () => {
 
   useEffect(() => {
     refresh();
+    productService.syncFromBackend();
     const handleUpdate = () => refresh();
     window.addEventListener('siska_products_updated', handleUpdate);
     return () => window.removeEventListener('siska_products_updated', handleUpdate);
@@ -55,33 +56,48 @@ const StokPage = () => {
   const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   /* ──────────── CRUD handlers ──────────── */
-  const handleSaveTambah = (newProduct) => {
-    productService.tambahBarang(newProduct, 'Admin Toko');
-    setModalTambah(false);
-    refresh();
-    success('Barang baru berhasil disimpan');
+  const handleSaveTambah = async (newProduct) => {
+    try {
+      await productService.tambahBarang(newProduct, 'Admin Toko');
+      setModalTambah(false);
+      refresh();
+      success('Barang baru berhasil disimpan');
+    } catch (err) {
+      toastError(err.message || 'Gagal menambah barang baru');
+    }
   };
 
-  const handleSaveHarga = (updatedProduct) => {
-    const updated = products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p));
-    productService.saveProducts(updated);
-    setModalUpdateHarga(null);
-    refresh();
-    success('Harga barang berhasil diperbarui');
+  const handleSaveHarga = async (updatedProduct) => {
+    try {
+      await productService.updateBarang(updatedProduct);
+      setModalUpdateHarga(null);
+      refresh();
+      success('Harga barang berhasil diperbarui');
+    } catch (err) {
+      toastError(err.message || 'Gagal memperbarui harga barang');
+    }
   };
 
-  const handleSaveStok = (product, tambahQty, catatan) => {
-    productService.restokBarang(product.id, tambahQty, 'Admin Toko', catatan);
-    setModalUpdateStok(null);
-    refresh();
-    success(`Stok ${product.nama} berhasil ditambahkan (+${tambahQty})`);
+  const handleSaveStok = async (product, tambahQty, catatan) => {
+    try {
+      await productService.restokBarang(product.id, tambahQty, 'Admin Toko', catatan);
+      setModalUpdateStok(null);
+      refresh();
+      success(`Stok ${product.nama} berhasil ditambahkan (+${tambahQty})`);
+    } catch (err) {
+      toastError(err.message || 'Gagal menambah stok barang');
+    }
   };
 
-  const handleHapus = (product) => {
-    productService.hapusBarang(product.id);
-    setModalHapus(null);
-    refresh();
-    success(`Barang "${product.nama}" berhasil dihapus`);
+  const handleHapus = async (product) => {
+    try {
+      await productService.hapusBarang(product.id);
+      setModalHapus(null);
+      refresh();
+      success(`Barang "${product.nama}" berhasil dihapus`);
+    } catch (err) {
+      toastError(err.message || 'Gagal menghapus barang');
+    }
   };
 
   /* ──────────── Stok badge coloring (BRD & SRS Peringatan Stok) ──────────── */

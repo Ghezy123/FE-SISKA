@@ -7,15 +7,16 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { Login } from '../pages/auth/Login';
 import { KasirPage } from '../pages/kasir/KasirPage';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { formatRupiah } from '../utils/helpers';
-import { productService } from '../services/productService';
 import { transaksiService } from '../services/transaksiService';
 import { StrukThermal } from '../components/common/StrukThermal';
 import CurrencyInput from '../components/common/CurrencyInput';
 
 export const AppRoutes = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const { cartItems, totalAmount, totalItems, clearCart } = useCart();
+  const { error: toastError } = useToast();
   const [currentPage, setCurrentPage] = useState('kasir');
 
   // Checkout modal states (Figma Frame 6:2328 & 6:3134)
@@ -51,21 +52,22 @@ export const AppRoutes = () => {
   const cashReceivedNumber = Number(uangDiterima) || totalAmount;
   const kembalian = Math.max(0, cashReceivedNumber - totalAmount);
 
-  const handleConfirmPayment = () => {
-    // 1. Kurangi stok barang di productService secara otomatis
-    productService.kurangiStok(cartItems);
+  const handleConfirmPayment = async () => {
+    try {
+      // Catat transaksi ke BE-SISKA (otomatis memvalidasi & mengurangi stok secara atomik)
+      const tx = await transaksiService.tambah(
+        cartItems,
+        totalAmount,
+        cashReceivedNumber,
+        kembalian
+      );
 
-    // 2. Catat transaksi ke transaksiService (riwayat & laporan langsung update)
-    const tx = transaksiService.tambah(
-      cartItems,
-      totalAmount,
-      cashReceivedNumber,
-      kembalian
-    );
-
-    // 3. Simpan data transaksi untuk struk After Pembayaran
-    setLastTransaction(tx);
-    setPaymentSuccess(true);
+      // Simpan data transaksi untuk struk After Pembayaran
+      setLastTransaction(tx);
+      setPaymentSuccess(true);
+    } catch (err) {
+      toastError(err.message || 'Gagal memproses pembayaran transaksi');
+    }
   };
 
   const handleCloseAfterPayment = () => {

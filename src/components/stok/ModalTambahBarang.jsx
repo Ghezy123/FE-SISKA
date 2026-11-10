@@ -148,7 +148,7 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
       satuan: satuanBase,
       stok: totalPhysicalStock,
       stok_minimal: Math.max(0, Number(form.stok_minimal) || 5),
-      kode: form.kode.trim() || `ATK-${Date.now().toString().slice(-4)}`,
+      kode: form.kode.trim() || undefined,
       satuan_opsi: satuanOpsi,
     });
   };

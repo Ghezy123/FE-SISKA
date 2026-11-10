@@ -49,7 +49,7 @@ export const StrukThermal = ({ transaction, cashierName = 'Petugas Toko' }) => {
         </div>
         <div className="meta-row">
           <span>Kasir         :</span>
-          <span>{cashierName}</span>
+          <span>{transaction.kasir || cashierName}</span>
         </div>
       </div>
 

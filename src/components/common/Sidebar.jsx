@@ -87,7 +87,9 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
           </div>
           <div className="siska-user-details">
             <span className="siska-user-fullname">{user?.nama || 'Petugas Toko'}</span>
-            <span className="siska-user-tag">Kasir & Stok</span>
+            <span className="siska-user-tag">
+              {user?.role ? `${user.role} • Kasir & Stok` : 'Kasir & Stok'}
+            </span>
           </div>
         </div>
 

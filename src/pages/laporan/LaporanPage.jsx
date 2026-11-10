@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { transaksiService } from '../../services/transaksiService';
 import { formatRupiah } from '../../utils/helpers';
+import { useToast } from '../../context/ToastContext';
 import { StrukThermal } from '../../components/common/StrukThermal';
 import './LaporanPage.css';
 
@@ -25,11 +26,14 @@ const PERIODE = [
 ];
 
 const LaporanPage = () => {
+  const { success, error: toastError } = useToast();
   const [semua, setSemua] = useState([]);
   const [periodeIdx, setPeriodeIdx] = useState(1); // Default: 7 Hari Terakhir
   const [showPeriode, setShowPeriode] = useState(false);
   const [lihatSemua, setLihatSemua] = useState(false);
   const [detailTx, setDetailTx] = useState(null);
+  const [showVoidInput, setShowVoidInput] = useState(false);
+  const [voidReason, setVoidReason] = useState('');
 
   const refresh = () => {
     setSemua(transaksiService.getAll());
@@ -38,6 +42,7 @@ const LaporanPage = () => {
   useEffect(() => {
     transaksiService.seed(); // inject sample data jika kosong
     refresh();
+    transaksiService.syncFromBackend();
     const handleUpdate = () => refresh();
     window.addEventListener('siska_transaksi_updated', handleUpdate);
     return () => window.removeEventListener('siska_transaksi_updated', handleUpdate);
@@ -66,12 +71,24 @@ const LaporanPage = () => {
     return semua.filter((t) => new Date(t.waktu) >= cutoff);
   }, [semua, periodeIdx]);
 
-  /* ─── Statistik ─── */
-  const totalOmzet = useMemo(() => filtered.reduce((s, t) => s + t.total, 0), [filtered]);
-  const totalTransaksi = filtered.length;
-  const totalBarang = useMemo(() => filtered.reduce((s, t) => s + t.jumlahBarang, 0), [filtered]);
+  // Aturan Bisnis SISKA: Hanya transaksi aktif (status = false / 0) yang dihitung dalam omzet & metrik penjualan
+  const activeFiltered = useMemo(
+    () => filtered.filter((t) => !Boolean(t.status)),
+    [filtered]
+  );
 
-  /* ─── Data grafik 7 hari ─── */
+  /* ─── Statistik ─── */
+  const totalOmzet = useMemo(
+    () => activeFiltered.reduce((s, t) => s + Number(t.total ?? t.total_harga ?? 0), 0),
+    [activeFiltered]
+  );
+  const totalTransaksi = activeFiltered.length;
+  const totalBarang = useMemo(
+    () => activeFiltered.reduce((s, t) => s + Number(t.jumlahBarang ?? t.jumlah_barang ?? 0), 0),
+    [activeFiltered]
+  );
+
+  /* ─── Data grafik 7 hari (hanya transaksi aktif) ─── */
   const chartData = useMemo(() => {
     const today = new Date();
     return Array.from({ length: 7 }, (_, i) => {
@@ -79,8 +96,8 @@ const LaporanPage = () => {
       d.setDate(d.getDate() - (6 - i));
       const dayStr = d.toDateString();
       const total = semua
-        .filter((t) => new Date(t.waktu).toDateString() === dayStr)
-        .reduce((s, t) => s + t.total, 0);
+        .filter((t) => !Boolean(t.status) && new Date(t.waktu).toDateString() === dayStr)
+        .reduce((s, t) => s + Number(t.total ?? t.total_harga ?? 0), 0);
       return { label: HARI[d.getDay()], total };
     });
   }, [semua]);
@@ -118,6 +135,20 @@ const LaporanPage = () => {
 
   const handlePrintStruk = () => {
     window.print();
+  };
+
+  const handleConfirmVoid = async () => {
+    if (!detailTx) return;
+    try {
+      const updated = await transaksiService.voidTransaksi(detailTx, voidReason);
+      setDetailTx(updated);
+      setShowVoidInput(false);
+      setVoidReason('');
+      refresh();
+      success(`Transaksi ${detailTx.id} berhasil dibatalkan (VOID) dan stok telah dikembalikan`);
+    } catch (err) {
+      toastError(err.message || 'Gagal membatalkan transaksi');
+    }
   };
 
   return (
@@ -292,8 +323,25 @@ const LaporanPage = () => {
               </tr>
             ) : (
               riwayat.map((t) => (
-                <tr key={t.id}>
-                  <td className="lap-cell-id">{t.id}</td>
+                <tr key={t.id} style={{ opacity: t.status ? 0.65 : 1 }}>
+                  <td className="lap-cell-id">
+                    <span>{t.id}</span>
+                    {Boolean(t.status) && (
+                      <span
+                        style={{
+                          marginLeft: '8px',
+                          padding: '2px 7px',
+                          borderRadius: '6px',
+                          background: '#fee2e2',
+                          color: '#dc2626',
+                          fontSize: '10px',
+                          fontWeight: '700',
+                        }}
+                      >
+                        VOID
+                      </span>
+                    )}
+                  </td>
                   <td className="lap-cell-waktu">
                     <span className="lap-waktu-inner">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -303,12 +351,18 @@ const LaporanPage = () => {
                     </span>
                   </td>
                   <td className="lap-cell-barang">{t.jumlahBarang} item</td>
-                  <td className="lap-cell-total">{formatRupiah(t.total)}</td>
+                  <td className="lap-cell-total" style={{ textDecoration: t.status ? 'line-through' : 'none' }}>
+                    {formatRupiah(t.total)}
+                  </td>
                   <td>
                     <button
                       className="btn-detail"
                       aria-label={`Detail transaksi ${t.id}`}
-                      onClick={() => setDetailTx(t)}
+                      onClick={() => {
+                        setDetailTx(t);
+                        setShowVoidInput(false);
+                        setVoidReason('');
+                      }}
                     >
                       Detail
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -400,7 +454,52 @@ const LaporanPage = () => {
                     </div>
                   </>
                 )}
+                {Boolean(detailTx.status) && (
+                  <div style={{ borderTop: '1px dashed #fca5a5', paddingTop: '8px', marginTop: '4px', color: '#dc2626', fontSize: '12px' }}>
+                    <strong>STATUS: VOID (DIBATALKAN)</strong>
+                    <div>Alasan: {detailTx.void_reason || detailTx.alasanVoid || '-'}</div>
+                  </div>
+                )}
               </div>
+
+              {!Boolean(detailTx.status) && showVoidInput && (
+                <div style={{ marginTop: '12px', padding: '12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#991b1b', marginBottom: '6px' }}>
+                    Alasan Pembatalan (Void) Transaksi *
+                  </label>
+                  <input
+                    type="text"
+                    value={voidReason}
+                    onChange={(e) => setVoidReason(e.target.value)}
+                    placeholder="Contoh: Salah input jumlah barang / pelanggan batal"
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      border: '1px solid #fca5a5',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      marginBottom: '8px',
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowVoidInput(false)}
+                      style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmVoid}
+                      style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: '#dc2626', color: '#fff', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                    >
+                      Konfirmasi Void &amp; Kembalikan Stok
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer" style={{ display: 'flex', gap: '10px' }}>
@@ -412,6 +511,25 @@ const LaporanPage = () => {
               >
                 Tutup
               </button>
+              {!Boolean(detailTx.status) && !showVoidInput && (
+                <button
+                  type="button"
+                  onClick={() => setShowVoidInput(true)}
+                  style={{
+                    flex: 1,
+                    height: '42px',
+                    borderRadius: '10px',
+                    border: '1px solid #fecaca',
+                    background: '#fef2f2',
+                    color: '#dc2626',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Void Transaksi
+                </button>
+              )}
               <button
                 type="button"
                 className="btn-simpan"

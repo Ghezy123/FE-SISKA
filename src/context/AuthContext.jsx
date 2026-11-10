@@ -1,29 +1,56 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { productService } from '../services/productService';
+import { layananService } from '../services/layananService';
+import { transaksiService } from '../services/transaksiService';
 
 const AuthContext = createContext(null);
+
+const triggerBackendSync = () => {
+  Promise.allSettled([
+    productService.syncFromBackend(),
+    layananService.syncFromBackend(),
+    transaksiService.syncFromBackend(),
+  ]);
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cek sesi saat aplikasi pertama kali dimuat
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-    setLoading(false);
+    let mounted = true;
+    const initAuth = async () => {
+      const cachedUser = authService.getCurrentUser();
+      if (cachedUser && mounted) {
+        setUser(cachedUser);
+      }
+
+      const verifiedUser = await authService.verifySession();
+      if (mounted) {
+        setUser(verifiedUser);
+        setLoading(false);
+        if (verifiedUser) {
+          triggerBackendSync();
+        }
+      }
+    };
+
+    initAuth();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const login = async (credentials) => {
     const userData = await authService.login(credentials);
     setUser(userData);
+    triggerBackendSync();
     return userData;
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
   };
 
@@ -49,4 +76,3 @@ export const useAuthContext = () => {
   }
   return context;
 };
-
