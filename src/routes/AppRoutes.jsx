@@ -6,12 +6,14 @@ import { MainLayout } from '../layouts/MainLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { Login } from '../pages/auth/Login';
 import { KasirPage } from '../pages/kasir/KasirPage';
+import { AkunPage } from '../pages/akun/AkunPage';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { formatRupiah } from '../utils/helpers';
 import { transaksiService } from '../services/transaksiService';
 import { StrukThermal } from '../components/common/StrukThermal';
 import CurrencyInput from '../components/common/CurrencyInput';
+import { isSuperAdminRole } from '../utils/constants';
 
 export const AppRoutes = () => {
   const { isAuthenticated, loading, user } = useAuth();
@@ -85,6 +87,8 @@ export const AppRoutes = () => {
         return <StokPage />;
       case 'laporan':
         return <LaporanPage />;
+      case 'akun':
+        return isSuperAdminRole(user?.role) ? <AkunPage /> : <KasirPage />;
       default:
         return <KasirPage />;
     }

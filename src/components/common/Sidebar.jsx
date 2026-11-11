@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { isSuperAdminRole } from '../../utils/constants';
 import './Sidebar.css';
 
 export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
@@ -40,6 +41,18 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
         </svg>
       ),
     },
+    ...(isSuperAdminRole(user?.role) ? [{
+      id: 'akun',
+      label: 'Akun',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    }] : []),
   ];
 
   return (
@@ -88,7 +101,7 @@ export const Sidebar = ({ activePage, onNavigate, isOpen }) => {
           <div className="siska-user-details">
             <span className="siska-user-fullname">{user?.nama || 'Petugas Toko'}</span>
             <span className="siska-user-tag">
-              {user?.role ? `${user.role} • Kasir & Stok` : 'Kasir & Stok'}
+              {user?.role || 'Admin'}
             </span>
           </div>
         </div>

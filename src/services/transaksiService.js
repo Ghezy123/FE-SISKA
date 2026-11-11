@@ -3,6 +3,25 @@ import { productService } from './productService';
 
 const STORAGE_KEY = 'siska_transaksi';
 
+// Bersihkan data transaksi dummy lama dari fase mockup/development
+const cleanLegacyTransaksi = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Hapus jika ada transaksi dengan kasir dummy atau id_user hardcode lama
+      if (Array.isArray(parsed) && parsed.some((t) =>
+        t.kasir === 'Demo Kasir' || t.kasir === 'Petugas Demo' || t.id === 'TRX-DEMO'
+      )) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  } catch {
+    // abaikan
+  }
+};
+cleanLegacyTransaksi();
+
 const resolveServiceId = (item) => {
   if (item.id_layanan && !Number.isNaN(Number(item.id_layanan))) {
     return Number(item.id_layanan);
@@ -194,58 +213,6 @@ export const transaksiService = {
     return updated.find((item) => item.id === tx.id || item.id_transaksi === tx.id_transaksi);
   },
 
-  /** Seed data contoh apabila mode offline belum memiliki transaksi */
-  seed: () => {
-    const existing = transaksiService.getAll();
-    if (existing.length > 0) return;
-
-    const base = new Date();
-    const sample = [
-      {
-        deltaDays: 0,
-        deltaH: 2,
-        id_transaksi: 1,
-        id: 'TRX-20261110-0001',
-        items: [
-          { nama: 'Kertas HVS A4 80gsm', qty: 1, harga: 55000 },
-          { nama: 'Pena Standard AE7', qty: 2, harga: 3000 },
-        ],
-        total: 61000,
-        jumlahBarang: 3,
-      },
-      {
-        deltaDays: 1,
-        deltaH: 3,
-        id_transaksi: 2,
-        id: 'TRX-20261109-0001',
-        items: [{ nama: 'Buku Tulis 38 Lembar', qty: 5, harga: 5000 }],
-        total: 25000,
-        jumlahBarang: 5,
-      },
-    ];
-
-    const list = sample.map((s) => {
-      const d = new Date(base);
-      d.setDate(d.getDate() - s.deltaDays);
-      d.setHours(d.getHours() - s.deltaH, 0, 0, 0);
-      return {
-        id_transaksi: s.id_transaksi,
-        no_struk: s.id,
-        id: s.id,
-        waktu: d.toISOString(),
-        tanggal_transaksi: d.toISOString(),
-        status: false,
-        status_label: 'AKTIF',
-        items: s.items.map((i) => ({ ...i, subtotal: i.qty * i.harga })),
-        jumlahBarang: s.jumlahBarang,
-        total: s.total,
-        total_harga: s.total,
-        uangDiterima: s.total,
-        uang_bayar: s.total,
-        kembalian: 0,
-      };
-    });
-
-    transaksiService.save(list);
-  },
+  /** Seed dinonaktifkan karena data transaksi dikelola langsung oleh BE-SISKA */
+  seed: () => {},
 };

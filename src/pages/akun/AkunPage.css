@@ -1,0 +1,570 @@
+/* ==========================================================================
+   Manajemen Akun Page (Khusus Super Admin)
+   Matching Frame: Manage akun oleh super admin
+   ========================================================================== */
+
+.siska-akun-page {
+  flex: 1;
+  padding: 28px 32px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header */
+.siska-akun-header {
+  margin-bottom: 24px;
+}
+
+.siska-akun-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #2563eb;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.siska-akun-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.6px;
+  margin: 0 0 4px 0;
+}
+
+.siska-akun-desc {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Toolbar */
+.siska-akun-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.siska-akun-search-box {
+  flex: 1;
+  max-width: 440px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.siska-akun-search-icon {
+  position: absolute;
+  left: 14px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.siska-akun-search-input {
+  width: 100%;
+  height: 44px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 44px 0 40px;
+  font-size: 13px;
+  color: #111827;
+  outline: none;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.siska-akun-search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.siska-akun-search-shortcut {
+  position: absolute;
+  right: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 2px 6px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.siska-btn-tambah-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  white-space: nowrap;
+}
+
+.siska-btn-tambah-user:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+/* Card & Table */
+.siska-akun-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.siska-akun-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.siska-akun-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.siska-akun-table thead {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.siska-akun-table th {
+  padding: 14px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.siska-akun-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.12s ease;
+}
+
+.siska-akun-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.siska-akun-table tbody tr:hover {
+  background-color: #fafbfc;
+}
+
+.siska-akun-table td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+/* User Info Column */
+.siska-cell-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.siska-user-row-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid #dbeafe;
+}
+
+.siska-user-row-name strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Username Column */
+.siska-cell-username {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Role Badge */
+.siska-role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.siska-role-badge.badge-super {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.siska-role-badge.badge-admin {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Action Buttons */
+.siska-cell-actions {
+  text-align: right;
+}
+
+.siska-user-action-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.siska-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  font-family: inherit;
+  background-color: #ffffff;
+}
+
+.siska-action-btn.btn-update {
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.siska-action-btn.btn-update:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.siska-action-btn.btn-hapus {
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+.siska-action-btn.btn-hapus:hover {
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.siska-akun-empty-row {
+  text-align: center;
+  padding: 48px 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Card Footer */
+.siska-akun-card-footer {
+  padding: 14px 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+}
+
+.siska-akun-footer-count {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.siska-akun-footer-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* ==========================================================================
+   Modals: Form Tambah/Update & Konfirmasi Hapus
+   ========================================================================== */
+
+.siska-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.siska-user-modal-dialog {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: siskaModalPop 0.18s ease-out;
+}
+
+@keyframes siskaModalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.siska-user-modal-header {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.siska-user-modal-eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #2563eb;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.siska-user-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.siska-user-modal-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.siska-modal-close-icon {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.siska-modal-close-icon:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.siska-user-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.siska-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.siska-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.siska-form-input {
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.12s ease;
+}
+
+.siska-form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.siska-form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.siska-user-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background-color: #f8fafc;
+}
+
+.siska-btn-modal-cancel {
+  height: 38px;
+  padding: 0 18px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  font-family: inherit;
+}
+
+.siska-btn-modal-cancel:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.siska-btn-modal-primary {
+  height: 38px;
+  padding: 0 22px;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.12s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
+}
+
+.siska-btn-modal-primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
+}
+
+/* Modal Delete */
+.siska-modal-delete-dialog {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 24px 24px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: siskaModalPop 0.18s ease-out;
+  box-sizing: border-box;
+}
+
+.siska-delete-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fee2e2;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.siska-delete-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.siska-delete-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.siska-delete-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.siska-delete-actions .siska-btn-modal-cancel {
+  flex: 1;
+  height: 40px;
+}
+
+.siska-btn-modal-danger {
+  flex: 1;
+  height: 40px;
+  background: #dc2626;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.25);
+}
+
+.siska-btn-modal-danger:hover {
+  background: #b91c1c;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.35);
+}
+

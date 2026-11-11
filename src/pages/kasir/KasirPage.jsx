@@ -52,7 +52,7 @@ export const KasirPage = () => {
     return { nama: product.satuan || 'Pcs', pengali: 1, harga: product.harga, label: product.satuan || 'Pcs' };
   };
 
-  // Daftar Kategori Unik dari data produk aktif (Tinta Printer sudah dihilangkan)
+  // Daftar Kategori Unik dari data produk aktif
   const categories = useMemo(() => {
     const list = ['Semua Kategori'];
     products.forEach((p) => {
@@ -152,7 +152,7 @@ export const KasirPage = () => {
           <span className="siska-kasir-date">{todayFormatted}</span>
           <h1 className="siska-kasir-title">Kasir</h1>
           <p className="siska-kasir-desc">
-            Pilih barang ATK atau hitung layanan fotokopi & jasa cetak.
+            Pilih barang ATK atau hitung layanan fotokopi &amp; jasa cetak.
           </p>
         </div>
         <div className="siska-store-status-badge">
@@ -176,7 +176,7 @@ export const KasirPage = () => {
           </div>
           <div className="siska-mode-info">
             <span className="siska-mode-title">Barang ATK</span>
-            <span className="siska-mode-sub">Pilih produk alat tulis & kertas</span>
+            <span className="siska-mode-sub">Pilih produk alat tulis &amp; kertas</span>
           </div>
         </button>
 
@@ -193,7 +193,7 @@ export const KasirPage = () => {
             </svg>
           </div>
           <div className="siska-mode-info">
-            <span className="siska-mode-title">Layanan Cetak & Jasa</span>
+            <span className="siska-mode-title">Layanan Cetak &amp; Jasa</span>
             <span className="siska-mode-sub">Print, fotokopi, laminating</span>
           </div>
         </button>
@@ -242,109 +242,116 @@ export const KasirPage = () => {
           </div>
 
           {/* Product Grid */}
-          <div className="siska-products-grid">
-            {paginatedProducts.map((product) => {
-              const activeUnit = getActiveUnit(product);
-              const currentUsed = cartItems
-                .filter((i) => i.id === product.id)
-                .reduce((sum, i) => sum + (i.quantity * (i.pengali || 1)), 0);
-              const needed = activeUnit.pengali || 1;
-              const isOutOfStock = product.stok <= 0;
-              const isLowStock = product.stok > 0 && product.stok <= (product.stok_minimal || 5);
-              const isMaxInCart = currentUsed + needed > product.stok;
-              const hasMultipleUnits = product.satuan_opsi && product.satuan_opsi.length > 1;
+          {filteredProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', borderRadius: '14px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
+              <p style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: '#334155' }}>Belum ada data barang</p>
+              <p style={{ margin: 0, fontSize: '13px' }}>Tambahkan barang melalui menu Stok Barang atau tunggu sinkronisasi dengan server backend.</p>
+            </div>
+          ) : (
+            <div className="siska-products-grid">
+              {paginatedProducts.map((product) => {
+                const activeUnit = getActiveUnit(product);
+                const currentUsed = cartItems
+                  .filter((i) => i.id === product.id)
+                  .reduce((sum, i) => sum + (i.quantity * (i.pengali || 1)), 0);
+                const needed = activeUnit.pengali || 1;
+                const isOutOfStock = product.stok <= 0;
+                const isLowStock = product.stok > 0 && product.stok <= (product.stok_minimal || 5);
+                const isMaxInCart = currentUsed + needed > product.stok;
+                const hasMultipleUnits = product.satuan_opsi && product.satuan_opsi.length > 1;
 
-              const itemKey = `${product.id}_${activeUnit.nama}`;
-              const inCartItem = cartItems.find((i) => i.itemKey === itemKey);
-              const anyInCart = cartItems.some((i) => i.id === product.id);
+                const itemKey = `${product.id}_${activeUnit.nama}`;
+                const inCartItem = cartItems.find((i) => i.itemKey === itemKey);
+                const anyInCart = cartItems.some((i) => i.id === product.id);
 
-              return (
-                <div
-                  key={product.id}
-                  className={`siska-product-card ${anyInCart ? 'in-cart' : ''} ${isOutOfStock ? 'disabled' : ''}`}
-                  onClick={() => handleAddProduct(product, activeUnit)}
-                  style={{
-                    opacity: isOutOfStock ? 0.6 : 1,
-                    cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  <div className="siska-card-top">
-                    <span className="siska-product-cat">{product.kategori}</span>
-                    <span
-                      className={`siska-product-stock ${isOutOfStock ? 'empty' : isLowStock ? 'low' : ''}`}
-                      style={{
-                        background: isOutOfStock ? '#fee2e2' : undefined,
-                        color: isOutOfStock ? '#dc2626' : undefined,
-                      }}
-                    >
-                      {isOutOfStock
-                        ? 'Habis'
-                        : isLowStock
-                        ? `Menipis (${product.stok - currentUsed})`
-                        : `Stok: ${product.stok - currentUsed} ${product.satuan || ''}`}
-                    </span>
-                  </div>
-
-                  <h3 className="siska-product-name">{product.nama}</h3>
-
-                  {/* Multi-Satuan / Borongan Selector Pills (Mendukung hingga 3 Tingkatan) */}
-                  {hasMultipleUnits && (
-                    <div
-                      className="siska-card-unit-selector"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {product.satuan_opsi.map((opt) => {
-                        const shortName = opt.namaSatuan || opt.nama?.split(' ')[0] || opt.nama;
-                        const isUnitActive = activeUnit.nama === opt.nama;
-                        return (
-                          <button
-                            key={opt.nama}
-                            type="button"
-                            className={`siska-card-unit-pill ${isUnitActive ? 'active' : ''}`}
-                            onClick={() => setSelectedUnits((prev) => ({ ...prev, [product.id]: opt }))}
-                            title={`${opt.label || opt.nama} (${opt.pengali}x = ${formatRupiah(opt.harga)})`}
-                          >
-                            {shortName}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  <div className="siska-card-bottom">
-                    <div className="siska-product-price-wrap">
-                      <span className="siska-product-price">
-                        {formatRupiah(activeUnit.harga)}
-                      </span>
-                      <span className="siska-unit-subtext">
-                        /{activeUnit.namaSatuan || activeUnit.nama?.split(' ')[0] || activeUnit.nama}
+                return (
+                  <div
+                    key={product.id}
+                    className={`siska-product-card ${anyInCart ? 'in-cart' : ''} ${isOutOfStock ? 'disabled' : ''}`}
+                    onClick={() => handleAddProduct(product, activeUnit)}
+                    style={{
+                      opacity: isOutOfStock ? 0.6 : 1,
+                      cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <div className="siska-card-top">
+                      <span className="siska-product-cat">{product.kategori}</span>
+                      <span
+                        className={`siska-product-stock ${isOutOfStock ? 'empty' : isLowStock ? 'low' : ''}`}
+                        style={{
+                          background: isOutOfStock ? '#fee2e2' : undefined,
+                          color: isOutOfStock ? '#dc2626' : undefined,
+                        }}
+                      >
+                        {isOutOfStock
+                          ? 'Habis'
+                          : isLowStock
+                          ? `Menipis (${product.stok - currentUsed})`
+                          : `Stok: ${product.stok - currentUsed} ${product.satuan || ''}`}
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      className="siska-add-btn"
-                      disabled={isOutOfStock || isMaxInCart}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddProduct(product, activeUnit);
-                      }}
-                      title={isOutOfStock ? 'Stok habis' : isMaxInCart ? 'Maksimal stok tercapai' : `Tambah ${activeUnit.label || activeUnit.nama} ke keranjang`}
-                      style={{
-                        opacity: isOutOfStock || isMaxInCart ? 0.5 : 1,
-                        cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
-                      }}
-                    >
-                      {inCartItem ? (
-                        <span className="siska-incart-badge">{inCartItem.quantity}</span>
-                      ) : (
-                        '+'
-                      )}
-                    </button>
+
+                    <h3 className="siska-product-name">{product.nama}</h3>
+
+                    {/* Multi-Satuan / Borongan Selector Pills (Mendukung hingga 3 Tingkatan) */}
+                    {hasMultipleUnits && (
+                      <div
+                        className="siska-card-unit-selector"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {product.satuan_opsi.map((opt) => {
+                          const shortName = opt.namaSatuan || opt.nama?.split(' ')[0] || opt.nama;
+                          const isUnitActive = activeUnit.nama === opt.nama;
+                          return (
+                            <button
+                              key={opt.nama}
+                              type="button"
+                              className={`siska-card-unit-pill ${isUnitActive ? 'active' : ''}`}
+                              onClick={() => setSelectedUnits((prev) => ({ ...prev, [product.id]: opt }))}
+                              title={`${opt.label || opt.nama} (${opt.pengali}x = ${formatRupiah(opt.harga)})`}
+                            >
+                              {shortName}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <div className="siska-card-bottom">
+                      <div className="siska-product-price-wrap">
+                        <span className="siska-product-price">
+                          {formatRupiah(activeUnit.harga)}
+                        </span>
+                        <span className="siska-unit-subtext">
+                          /{activeUnit.namaSatuan || activeUnit.nama?.split(' ')[0] || activeUnit.nama}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="siska-add-btn"
+                        disabled={isOutOfStock || isMaxInCart}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddProduct(product, activeUnit);
+                        }}
+                        title={isOutOfStock ? 'Stok habis' : isMaxInCart ? 'Maksimal stok tercapai' : `Tambah ${activeUnit.label || activeUnit.nama} ke keranjang`}
+                        style={{
+                          opacity: isOutOfStock || isMaxInCart ? 0.5 : 1,
+                          cursor: isOutOfStock || isMaxInCart ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {inCartItem ? (
+                          <span className="siska-incart-badge">{inCartItem.quantity}</span>
+                        ) : (
+                          '+'
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Pagination ATK (Muncul jika barang lebih dari batas tertentu / ATK_ITEMS_PER_PAGE) */}
           {totalPages > 1 && (
@@ -399,7 +406,7 @@ export const KasirPage = () => {
         /* Layanan Cetak & Jasa (3 Opsi: Print, Fotokopi, Laminating - Langsung Masukkan Total Nominal) */
         <div className="siska-layanan-cetak-panel">
           <div className="siska-layanan-header-v4">
-            <h2>Layanan Cetak & Jasa (Alya Fotocopy)</h2>
+            <h2>Layanan Cetak &amp; Jasa (Alya Fotocopy)</h2>
             <p>Pilih layanan, masukkan nominal total pembayaran pelanggan, lalu klik tambah ke keranjang.</p>
           </div>
 

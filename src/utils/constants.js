@@ -9,10 +9,16 @@ export const APP_CONFIG = {
 };
 
 export const USER_ROLES = {
-  OWNER: 'Owner',
-  EMPLOYEE: 'Employee',
-  KASIR: 'Employee',
-  ADMIN: 'Owner',
+  SUPER_ADMIN: 'Super Admin',
+  ADMIN: 'Admin',
+  OWNER: 'Super Admin',
+  EMPLOYEE: 'Admin',
+  KASIR: 'Admin',
+};
+
+export const isSuperAdminRole = (role) => {
+  const r = String(role || '').toLowerCase();
+  return r === 'super admin' || r === 'superadmin' || r === 'owner' || r === 'administrator';
 };
 
 export const STORAGE_KEYS = {

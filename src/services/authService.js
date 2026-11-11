@@ -35,30 +35,13 @@ export const authService = {
       localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(backendUser));
       return backendUser;
     } catch (err) {
-      // Jika error berasal dari response HTTP backend (400, 401, 403, 429), teruskan pesan aslinya
+      // Jika error berasal dari response HTTP backend (400, 401, 403, 429, dsb), teruskan pesan aslinya
       if (err.status) {
         throw err;
       }
 
-      // Fallback mode offline jika server BE-SISKA belum dinyalakan
-      const validUsername = 'alya fotocopy';
-      const validPassword = 'Sawahlunto123';
-      const inputUser = credentials.username.trim().toLowerCase();
-      const inputPass = credentials.password;
-
-      if (inputUser === validUsername && inputPass === validPassword) {
-        const offlineUser = normalizeUser({
-          id_user: 1,
-          nama_lengkap: 'Pemilik Alya Fotocopy',
-          username: credentials.username.trim(),
-          role: 'Owner',
-        });
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, 'offline-demo-session');
-        localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(offlineUser));
-        return offlineUser;
-      }
-
-      throw new Error('Username atau password salah. Silakan coba lagi.');
+      // Server BE tidak dapat dijangkau — tampilkan pesan yang jelas
+      throw new Error('Tidak dapat terhubung ke server. Pastikan server backend sudah berjalan.');
     }
   },
 

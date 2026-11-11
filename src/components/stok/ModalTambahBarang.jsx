@@ -4,7 +4,6 @@ import CurrencyInput from '../common/CurrencyInput';
 import './StokModals.css';
 
 const CATEGORIES = ['Kertas', 'Alat Tulis', 'Buku', 'Arsip', 'Perekat', 'Lainnya'];
-const SATUAN_OPTIONS = ['Pcs', 'Lembar', 'Rim', 'Buku', 'Botol', 'Pack', 'Lusin'];
 
 const ModalTambahBarang = ({ onClose, onSave }) => {
   const { warning } = useToast();
@@ -221,10 +220,15 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
                 </div>
                 <div className="modal-body-row">
                   <div className="form-field">
-                    <label className="form-label">Satuan Eceran</label>
-                    <select className="form-select form-input" name="satuan" value={form.satuan} onChange={handleChange}>
-                      {SATUAN_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <label className="form-label">Nama Satuan</label>
+                    <input
+                      className="form-input"
+                      name="satuan"
+                      value={form.satuan}
+                      onChange={handleChange}
+                      placeholder="Contoh: Pcs / Lembar / Buku"
+                      required
+                    />
                   </div>
                   <div className="form-field">
                     <label className="form-label">Harga Jual Eceran</label>

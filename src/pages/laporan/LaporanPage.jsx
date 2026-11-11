@@ -40,7 +40,6 @@ const LaporanPage = () => {
   };
 
   useEffect(() => {
-    transaksiService.seed(); // inject sample data jika kosong
     refresh();
     transaksiService.syncFromBackend();
     const handleUpdate = () => refresh();

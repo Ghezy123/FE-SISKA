@@ -8,6 +8,7 @@ import './StokModals.css';
 const ModalUpdateHarga = ({ product, onClose, onSave }) => {
   const [hargaBeli, setHargaBeli] = useState(product.hargaBeli ?? product.harga);
   const [harga, setHarga] = useState(product.harga);
+  const [satuan, setSatuan] = useState(product.satuan || 'Pcs');
   const [confirmStep, setConfirmStep] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
@@ -36,6 +37,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
     const initialHargaBeli = product.hargaBeli ?? product.harga;
     if (Number(hargaBeli) !== Number(initialHargaBeli)) return true;
     if (Number(harga) !== Number(product.harga)) return true;
+    if (satuan !== (product.satuan || 'Pcs')) return true;
 
     const initHasTier2 = Boolean(existingTier2);
     if (hasTier2 !== initHasTier2) return true;
@@ -54,7 +56,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
     }
 
     return false;
-  }, [hargaBeli, harga, hasTier2, tier2, hasTier3, tier3, product, existingTier2, existingTier3]);
+  }, [hargaBeli, harga, satuan, hasTier2, tier2, hasTier3, tier3, product, existingTier2, existingTier3]);
 
   const handleRequestClose = () => {
     if (isDirty) {
@@ -71,7 +73,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
 
   const handleSave = () => {
     const newHargaEcer = Number(harga);
-    const satuanBase = product.satuan || 'Pcs';
+    const satuanBase = satuan.trim() || product.satuan || 'Pcs';
 
     const updatedSatuanOpsi = [
       {
@@ -112,6 +114,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
 
     onSave({
       ...product,
+      satuan: satuanBase,
       hargaBeli: Number(hargaBeli),
       harga: newHargaEcer,
       satuan_opsi: updatedSatuanOpsi,
@@ -188,19 +191,31 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
               {/* TIER 1: Ecer */}
               <div className="tier-card tier-active">
                 <div className="tier-card-header">
-                  <span className="tier-badge tier-badge-1">Tingkat 1 • Eceran Dasar ({product.satuan || 'Pcs'})</span>
+                  <span className="tier-badge tier-badge-1">Tingkat 1 • Eceran Dasar ({satuan || 'Pcs'})</span>
                   <span style={{ fontSize: '12px', color: '#64748b' }}>Unit Dasar</span>
                 </div>
-                <div className="form-field">
-                  <label className="form-label">Harga Jual Eceran</label>
-                  <CurrencyInput
-                    className="form-input"
-                    value={harga}
-                    onChange={(raw) => setHarga(raw)}
-                    placeholder="Contoh: 300 / 3000"
-                    min={0}
-                    required
-                  />
+                <div className="modal-body-row">
+                  <div className="form-field">
+                    <label className="form-label">Nama Satuan</label>
+                    <input
+                      className="form-input"
+                      value={satuan}
+                      onChange={(e) => setSatuan(e.target.value)}
+                      placeholder="Contoh: Pcs / Lembar / Buku"
+                      required
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label className="form-label">Harga Jual Eceran</label>
+                    <CurrencyInput
+                      className="form-input"
+                      value={harga}
+                      onChange={(raw) => setHarga(raw)}
+                      placeholder="Contoh: 300 / 3000"
+                      min={0}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -230,7 +245,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
                       />
                     </div>
                     <div className="form-field">
-                      <label className="form-label">Isi per {tier2.nama || 'Pack'} ({product.satuan || 'Pcs'})</label>
+                      <label className="form-label">Isi per {tier2.nama || 'Pack'} ({satuan || 'Pcs'})</label>
                       <CurrencyInput
                         className="form-input"
                         min={2}
@@ -281,7 +296,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
                       />
                     </div>
                     <div className="form-field">
-                      <label className="form-label">Total Isi per {tier3.nama || 'Box'} ({product.satuan || 'Pcs'})</label>
+                      <label className="form-label">Total Isi per {tier3.nama || 'Box'} ({satuan || 'Pcs'})</label>
                       <CurrencyInput
                         className="form-input"
                         min={2}
