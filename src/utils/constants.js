@@ -5,7 +5,7 @@ export const APP_CONFIG = {
   FULL_NAME: 'Sistem Informasi Stok dan Kasir',
   TAGLINE: 'Sistem Kasir & Inventori Alya Fotocopy',
   VERSION: '1.0.0',
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || '/api',
 };
 
 export const USER_ROLES = {
