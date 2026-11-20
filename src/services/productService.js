@@ -276,12 +276,44 @@ export const productService = {
   },
 
   // Koreksi stok fisik / stock opname (POST /api/products/:id/adjust-stock)
-  koreksiStokBarang: async (id, jumlahKoreksi, catatan) => {
-    const res = await api.post(`/products/${Number(id)}/adjust-stock`, {
-      jumlah_koreksi: Number(jumlahKoreksi),
-      catatan,
+  koreksiStokBarang: async (id, jumlahKoreksi, catatan = 'Koreksi stok fisik') => {
+    try {
+      if (!Number.isNaN(Number(id))) {
+        const res = await api.post(`/products/${Number(id)}/adjust-stock`, {
+          jumlah_koreksi: Number(jumlahKoreksi),
+          catatan,
+        });
+        await productService.syncFromBackend();
+        return res.data;
+      }
+    } catch (err) {
+      if (err.status) throw err;
+    }
+
+    // Fallback penyimpanan lokal bila offline
+    const current = productService.getProducts();
+    let target = null;
+    const updated = current.map((p) => {
+      if (String(p.id) === String(id)) {
+        target = p;
+        const newStok = Math.max(0, p.stok + Number(jumlahKoreksi));
+        return { ...p, stok: newStok };
+      }
+      return p;
     });
-    await productService.syncFromBackend();
-    return res.data;
+    productService.saveProducts(updated);
+
+    if (target) {
+      stockLogService.addLog({
+        id_barang: target.id,
+        nama_barang: target.nama,
+        jenis: 'koreksi',
+        jumlah: Number(jumlahKoreksi),
+        harga_beli: target.hargaBeli,
+        catatan: catatan || 'Koreksi stok fisik',
+        user: 'Admin Toko',
+      });
+    }
+    return updated;
   },
 };

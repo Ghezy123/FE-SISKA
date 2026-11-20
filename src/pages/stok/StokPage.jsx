@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import ModalTambahBarang from '../../components/stok/ModalTambahBarang';
 import ModalUpdateHarga from '../../components/stok/ModalUpdateHarga';
 import ModalUpdateStok from '../../components/stok/ModalUpdateStok';
+import ModalKoreksiStok from '../../components/stok/ModalKoreksiStok';
 import ModalMauUpdateApa from '../../components/stok/ModalMauUpdateApa';
 import ModalKonfirmasiHapus from '../../components/stok/ModalKonfirmasiHapus';
 import './StokPage.css';
@@ -23,6 +24,7 @@ const StokPage = () => {
   const [modalUpdateApa, setModalUpdateApa] = useState(null);
   const [modalUpdateHarga, setModalUpdateHarga] = useState(null);
   const [modalUpdateStok, setModalUpdateStok] = useState(null);
+  const [modalKoreksiStok, setModalKoreksiStok] = useState(null);
   const [modalHapus, setModalHapus] = useState(null);
 
   const refresh = () => {
@@ -86,6 +88,18 @@ const StokPage = () => {
       success(`Stok ${product.nama} berhasil ditambahkan (+${tambahQty})`);
     } catch (err) {
       toastError(err.message || 'Gagal menambah stok barang');
+    }
+  };
+
+  const handleSaveKoreksiStok = async (product, selisih, catatan) => {
+    try {
+      await productService.koreksiStokBarang(product.id, selisih, catatan);
+      setModalKoreksiStok(null);
+      refresh();
+      const tanda = selisih > 0 ? '+' : '';
+      success(`Stok ${product.nama} berhasil dikoreksi (${tanda}${selisih})`);
+    } catch (err) {
+      toastError(err.message || 'Gagal mengoreksi stok barang');
     }
   };
 
@@ -161,13 +175,13 @@ const StokPage = () => {
         <table className="stok-table">
           <thead>
             <tr>
-              <th>KODE</th>
-              <th>NAMA BARANG</th>
-              <th>KATEGORI</th>
-              <th>HARGA BELI</th>
-              <th>HARGA JUAL</th>
-              <th>STOK</th>
-              <th>AKSI</th>
+              <th style={{ width: '12%', minWidth: '90px' }}>KODE</th>
+              <th style={{ width: '32%', minWidth: '200px' }}>NAMA BARANG</th>
+              <th style={{ width: '15%', minWidth: '120px' }}>KATEGORI</th>
+              <th style={{ width: '13%', minWidth: '110px' }}>HARGA BELI</th>
+              <th style={{ width: '13%', minWidth: '110px' }}>HARGA JUAL</th>
+              <th style={{ width: '8%', minWidth: '80px' }}>STOK</th>
+              <th style={{ width: '7%', minWidth: '80px', textAlign: 'center' }}>AKSI</th>
             </tr>
           </thead>
           <tbody>
@@ -289,6 +303,7 @@ const StokPage = () => {
           onClose={() => setModalUpdateApa(null)}
           onUpdateHarga={(p) => { setModalUpdateApa(null); setModalUpdateHarga(p); }}
           onUpdateStok={(p) => { setModalUpdateApa(null); setModalUpdateStok(p); }}
+          onKoreksiStok={(p) => { setModalUpdateApa(null); setModalKoreksiStok(p); }}
         />
       )}
 
@@ -305,6 +320,14 @@ const StokPage = () => {
           product={modalUpdateStok}
           onClose={() => setModalUpdateStok(null)}
           onSave={handleSaveStok}
+        />
+      )}
+
+      {modalKoreksiStok && (
+        <ModalKoreksiStok
+          product={modalKoreksiStok}
+          onClose={() => setModalKoreksiStok(null)}
+          onSave={handleSaveKoreksiStok}
         />
       )}
 

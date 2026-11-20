@@ -306,7 +306,7 @@ const LaporanPage = () => {
         <table className="lap-table">
           <thead>
             <tr>
-              <th>ID TRANSAKSI</th>
+              <th>NO. TRANSAKSI</th>
               <th>WAKTU</th>
               <th>JUMLAH BARANG</th>
               <th>TOTAL BELANJA</th>
