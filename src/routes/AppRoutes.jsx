@@ -46,12 +46,12 @@ export const AppRoutes = () => {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
-    setUangDiterima(totalAmount);
+    setUangDiterima('');
     setPaymentSuccess(false);
     setShowCheckoutModal(true);
   };
 
-  const cashReceivedNumber = Number(uangDiterima) || totalAmount;
+  const cashReceivedNumber = Number(uangDiterima) || 0;
   const kembalian = Math.max(0, cashReceivedNumber - totalAmount);
 
   const handleConfirmPayment = async () => {

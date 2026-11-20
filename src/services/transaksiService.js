@@ -78,7 +78,7 @@ export const transaksiService = {
    * Tambah satu transaksi baru saat checkout kasir.
    * Terhubung ke POST /api/transactions di BE-SISKA (dengan fallback lokal bila server offline).
    */
-  tambah: async (items, total, uangDiterima = total, kembalian = 0) => {
+  tambah: async (items, total, uangDiterima = 0, kembalian = 0) => {
     const idempotencyKey = `trx_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     try {
@@ -101,7 +101,7 @@ export const transaksiService = {
       const res = await api.post(
         '/transactions',
         {
-          uang_bayar: Number(uangDiterima) || Number(total),
+          uang_bayar: Number(uangDiterima),
           idempotency_key: idempotencyKey,
           items: payloadItems,
         },
@@ -137,7 +137,7 @@ export const transaksiService = {
       kasir: 'Petugas Toko',
       tanggal_transaksi: now.toISOString(),
       total_harga: total,
-      uang_bayar: Number(uangDiterima) || total,
+      uang_bayar: Number(uangDiterima) || 0,
       kembalian: Number(kembalian) || 0,
       status: false,
       status_label: 'AKTIF',
@@ -162,7 +162,7 @@ export const transaksiService = {
       })),
       jumlahBarang: items.reduce((s, i) => s + (i.quantity || i.qty || 1), 0),
       total,
-      uangDiterima: Number(uangDiterima) || total,
+      uangDiterima: Number(uangDiterima) || 0,
     };
 
     const updated = [newTx, ...all];
