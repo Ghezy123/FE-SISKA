@@ -276,14 +276,15 @@
   flex: 1;
   width: 100%;
   height: 48px;
-  padding: 0;
+  padding: 0 10px;
   max-width: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
   border-radius: 10px;
+  white-space: nowrap;
 }
 
 .btn-choice {
@@ -295,75 +296,6 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .btn-choice:hover { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
-
-/* Vertical Choice Option List */
-.update-choice-vertical {
-  flex-direction: column !important;
-  gap: 10px !important;
-  width: 100%;
-}
-
-.btn-choice-option {
-  width: 100%;
-  padding: 14px 16px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease;
-  font-family: 'Inter', sans-serif;
-  box-sizing: border-box;
-}
-
-.btn-choice-option:hover {
-  background: #f8fafc;
-  border-color: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
-}
-
-.btn-choice-option.btn-choice-koreksi:hover {
-  border-color: #d97706;
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);
-}
-
-.choice-option-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.choice-option-desc {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 400;
-  line-height: 1.4;
-}
-
-.btn-choice-cancel {
-  width: 100%;
-  height: 42px;
-  background: transparent;
-  border: none;
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.15s;
-  font-family: 'Inter', sans-serif;
-  margin-top: 4px;
-}
-
-.btn-choice-cancel:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
 
 /* ─── Multi-Tier UoM (3 Tingkatan Satuan & Harga) ─── */
 .multi-tier-container {
