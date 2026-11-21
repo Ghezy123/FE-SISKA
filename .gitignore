@@ -33,6 +33,7 @@ lerna-debug.log*
 .tmp/
 temp/
 scratch/
+*.txt
 
 # Editor & OS files
 .vscode/*

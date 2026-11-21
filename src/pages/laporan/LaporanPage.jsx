@@ -14,8 +14,9 @@ function formatWaktu(iso) {
   return `${tgl}, ${jam}`;
 }
 
-/* ─── helper: label hari ─── */
+/* ─── helper: label hari & bulan ─── */
 const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+const BULAN_PENDEK = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
 /* ─── Periode options (SRS UC 4: Hari Ini, Minggu Ini / 7 Hari, Bulan Ini) ─── */
 const PERIODE = [
@@ -55,19 +56,19 @@ const LaporanPage = () => {
     if (days === 0) {
       // Khusus 'Hari Ini' (SRS UC4)
       const todayStr = now.toDateString();
-      return semua.filter((t) => new Date(t.waktu).toDateString() === todayStr);
+      return semua.filter((t) => new Date(t.waktu || t.tanggal_transaksi || t.created_at).toDateString() === todayStr);
     }
 
     if (days === -1) {
       // Khusus 'Bulan Ini'
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      return semua.filter((t) => new Date(t.waktu) >= startOfMonth);
+      return semua.filter((t) => new Date(t.waktu || t.tanggal_transaksi || t.created_at) >= startOfMonth);
     }
 
     // 7 hari atau 30 hari terakhir
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
-    return semua.filter((t) => new Date(t.waktu) >= cutoff);
+    return semua.filter((t) => new Date(t.waktu || t.tanggal_transaksi || t.created_at) >= cutoff);
   }, [semua, periodeIdx]);
 
   // Aturan Bisnis SISKA: Hanya transaksi aktif (status = false / 0) yang dihitung dalam omzet & metrik penjualan
@@ -87,19 +88,95 @@ const LaporanPage = () => {
     [activeFiltered]
   );
 
-  /* ─── Data grafik 7 hari (hanya transaksi aktif) ─── */
+  /* ─── Data grafik tren dinamis sesuai periode yang dipilih (hanya transaksi aktif) ─── */
   const chartData = useMemo(() => {
-    const today = new Date();
+    const days = PERIODE[periodeIdx].days;
+    const now = new Date();
+
+    // 1. Khusus 'Hari Ini' -> breakdown omzet per slot jam kerja kasir
+    if (days === 0) {
+      const slots = [
+        { label: '08:00', minHour: 0, maxHour: 10 },
+        { label: '10:00', minHour: 10, maxHour: 12 },
+        { label: '12:00', minHour: 12, maxHour: 14 },
+        { label: '14:00', minHour: 14, maxHour: 16 },
+        { label: '16:00', minHour: 16, maxHour: 18 },
+        { label: '18:00', minHour: 18, maxHour: 20 },
+        { label: '20:00', minHour: 20, maxHour: 24 },
+      ];
+      const todayStr = now.toDateString();
+      return slots.map((slot) => {
+        const total = semua
+          .filter((t) => {
+            if (Boolean(t.status)) return false;
+            const txDate = new Date(t.waktu || t.tanggal_transaksi || t.created_at);
+            if (txDate.toDateString() !== todayStr) return false;
+            const hour = txDate.getHours();
+            return hour >= slot.minHour && hour < slot.maxHour;
+          })
+          .reduce((s, t) => s + Number(t.total ?? t.total_harga ?? 0), 0);
+        return {
+          label: `Jam ${slot.label}`,
+          displayLabel: slot.label,
+          total,
+        };
+      });
+    }
+
+    // 2. Khusus 'Bulan Ini' -> rentang tanggal 1 s.d. hari ini di bulan berjalan
+    if (days === -1) {
+      const totalDays = now.getDate();
+      const count = Math.max(totalDays, 1);
+      return Array.from({ length: count }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth(), i + 1);
+        const dayStr = d.toDateString();
+        const total = semua
+          .filter((t) => !Boolean(t.status) && new Date(t.waktu || t.tanggal_transaksi || t.created_at).toDateString() === dayStr)
+          .reduce((s, t) => s + Number(t.total ?? t.total_harga ?? 0), 0);
+        const isLabel = count <= 10 || i === 0 || i === count - 1 || (i + 1) % 5 === 0;
+        const fullLabel = `${d.getDate()} ${BULAN_PENDEK[d.getMonth()]}`;
+        return {
+          label: fullLabel,
+          displayLabel: isLabel ? `${d.getDate()}` : '',
+          total,
+        };
+      });
+    }
+
+    // 3. Khusus '30 Hari Terakhir' -> 30 titik harian dengan label tiap 5 hari
+    if (days === 30) {
+      return Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(now);
+        d.setDate(d.getDate() - (29 - i));
+        const dayStr = d.toDateString();
+        const total = semua
+          .filter((t) => !Boolean(t.status) && new Date(t.waktu || t.tanggal_transaksi || t.created_at).toDateString() === dayStr)
+          .reduce((s, t) => s + Number(t.total ?? t.total_harga ?? 0), 0);
+        const isLabel = i % 5 === 0 || i === 29;
+        const fullLabel = `${d.getDate()} ${BULAN_PENDEK[d.getMonth()]}`;
+        return {
+          label: fullLabel,
+          displayLabel: isLabel ? `${d.getDate()}/${d.getMonth() + 1}` : '',
+          total,
+        };
+      });
+    }
+
+    // 4. Default: '7 Hari Terakhir' (atau days lainnya)
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
+      const d = new Date(now);
       d.setDate(d.getDate() - (6 - i));
       const dayStr = d.toDateString();
       const total = semua
-        .filter((t) => !Boolean(t.status) && new Date(t.waktu).toDateString() === dayStr)
+        .filter((t) => !Boolean(t.status) && new Date(t.waktu || t.tanggal_transaksi || t.created_at).toDateString() === dayStr)
         .reduce((s, t) => s + Number(t.total ?? t.total_harga ?? 0), 0);
-      return { label: HARI[d.getDay()], total };
+      return {
+        label: `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN_PENDEK[d.getMonth()]}`,
+        displayLabel: HARI[d.getDay()],
+        total,
+      };
     });
-  }, [semua]);
+  }, [semua, periodeIdx]);
 
   const maxChart = Math.max(...chartData.map((d) => d.total), 1);
 
@@ -115,9 +192,9 @@ const LaporanPage = () => {
   const PAD = { top: 16, right: 8, bottom: 28, left: 0 };
   const chartW = W - PAD.left - PAD.right;
   const chartH = H - PAD.top - PAD.bottom;
-  const n = chartData.length;
+  const n = Math.max(chartData.length, 1);
   const pts = chartData.map((d, i) => ({
-    x: PAD.left + (i / (n - 1)) * chartW,
+    x: PAD.left + (n > 1 ? (i / (n - 1)) * chartW : chartW / 2),
     y: PAD.top + chartH - (d.total / maxChart) * chartH,
   }));
 
@@ -239,16 +316,22 @@ const LaporanPage = () => {
         </div>
       </div>
 
-      {/* ── Chart: Tren Pendapatan ── */}
+      {/* ── Chart: Tren Pendapatan Dinamis Sesuai Periode ── */}
       <div className="lap-chart-card">
         <div className="lap-chart-header">
           <div>
-            <h2 className="lap-chart-title">Tren Pendapatan (7 Hari Terakhir)</h2>
-            <p className="lap-chart-sub">Pergerakan total omzet harian toko</p>
+            <h2 className="lap-chart-title">Tren Pendapatan ({PERIODE[periodeIdx].label})</h2>
+            <p className="lap-chart-sub">
+              {periodeIdx === 0
+                ? 'Pergerakan omzet per jam operasional hari ini'
+                : 'Pergerakan total omzet harian toko'}
+            </p>
           </div>
           <div className="lap-chart-legend">
             <span className="lap-chart-dot" />
-            <span className="lap-chart-legend-label">Omzet Harian</span>
+            <span className="lap-chart-legend-label">
+              {periodeIdx === 0 ? 'Omzet per Jam' : 'Omzet Harian'}
+            </span>
           </div>
         </div>
 
@@ -273,13 +356,31 @@ const LaporanPage = () => {
               </defs>
               <path d={areaPath} fill="url(#chartGrad)" />
               <path d={linePath} fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinejoin="round" />
-              {pts.map((p, i) => (
-                <circle key={i} cx={p.x} cy={p.y} r="4" fill="#2563eb" />
-              ))}
+              {pts.map((p, i) => {
+                const showCircle = chartData.length <= 14 || chartData[i]?.total > 0 || Boolean(chartData[i]?.displayLabel);
+                if (!showCircle) return null;
+                return (
+                  <circle
+                    key={i}
+                    cx={p.x}
+                    cy={p.y}
+                    r={chartData.length > 14 ? 3 : 4}
+                    fill="#2563eb"
+                  >
+                    <title>{`${chartData[i]?.label}: ${formatRupiah(chartData[i]?.total)}`}</title>
+                  </circle>
+                );
+              })}
             </svg>
             <div className="lap-x-axis">
               {chartData.map((d, i) => (
-                <span key={i} className="lap-x-label">{d.label}</span>
+                <span
+                  key={i}
+                  className="lap-x-label"
+                  style={{ visibility: d.displayLabel ? 'visible' : 'hidden' }}
+                >
+                  {d.displayLabel || '-'}
+                </span>
               ))}
             </div>
           </div>

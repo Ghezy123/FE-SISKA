@@ -45,14 +45,41 @@ const resolveProductId = (item) => {
   return Number(item.id) || 1;
 };
 
+export const normalizeTransactionItem = (t, idx = 0) => {
+  if (!t) return t;
+  const id = t.id || t.no_struk || (t.id_transaksi ? `TRX-${t.id_transaksi}` : `TRX-${idx + 1}`);
+  const waktu = t.waktu || t.tanggal_transaksi || t.created_at || new Date().toISOString();
+  const total = Number(t.total ?? t.total_harga ?? 0);
+  const details = t.items || t.transaction_details || [];
+  const jumlahBarang = Number(
+    t.jumlahBarang ??
+    t.jumlah_barang ??
+    (Array.isArray(details) ? details.reduce((acc, it) => acc + Number(it.qty || it.quantity || 1), 0) : 0)
+  );
+
+  return {
+    ...t,
+    id,
+    waktu,
+    total,
+    jumlahBarang,
+    id_transaksi: t.id_transaksi || t.id,
+    no_struk: t.no_struk || id,
+    tanggal_transaksi: t.tanggal_transaksi || waktu,
+    total_harga: t.total_harga ?? total,
+    status: Boolean(t.status),
+  };
+};
+
 export const transaksiService = {
   syncFromBackend: async () => {
     try {
       const res = await api.get('/transactions?limit=200');
       if (Array.isArray(res?.data)) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(res.data));
+        const normalized = res.data.map((t, idx) => normalizeTransactionItem(t, idx));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
         window.dispatchEvent(new Event('siska_transaksi_updated'));
-        return res.data;
+        return normalized;
       }
     } catch {
       // Gunakan cache lokal jika server sedang offline
@@ -63,7 +90,9 @@ export const transaksiService = {
   getAll: () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map((t, idx) => normalizeTransactionItem(t, idx)) : [];
     } catch {
       return [];
     }
