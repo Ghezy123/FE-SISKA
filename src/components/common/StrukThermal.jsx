@@ -32,8 +32,8 @@ export const StrukThermal = ({ transaction, cashierName = 'Petugas Toko' }) => {
       <div className="receipt-header">
         <h2 className="shop-title">ALYA FOTOCOPY</h2>
         <p className="shop-subtitle">Layanan Fotokopi, Jilid & ATK</p>
-        <p className="shop-address">Jl. Kramat Permai, Sukatani, Tapos, Depok</p>
-        <p className="shop-telp">Telp: 0821-2227-8022</p>
+        <p className="shop-address">Jl. Gurun Aua, Kubang Putiah, Kec. Banuhampu, Kab. Agam, Sumatera Barat 26181</p>
+        <p className="shop-telp">Telp: 0812-6764-720</p>
       </div>
 
       <div className="receipt-divider-double">================================</div>
