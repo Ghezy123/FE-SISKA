@@ -28,7 +28,9 @@ const normalizeUserItem = (u, idx = 0) => {
   const username = (u.username || '').replace(/^@/, '');
   const roleRaw = u.role || (u.id_role === 1 ? 'Owner' : 'Employee');
   const role = isSuperAdminRole(roleRaw) ? 'Super Admin' : 'Admin';
-  const statusAktif = u.status_aktif !== undefined ? Boolean(u.status_aktif) : true;
+  const statusAktif = u.status_aktif !== undefined && u.status_aktif !== null
+    ? (u.status_aktif === 1 || u.status_aktif === true || u.status_aktif === '1')
+    : true;
 
   return {
     id,
@@ -117,11 +119,26 @@ export const userService = {
   },
 
   deleteUser: async (id) => {
-    await api.patch(`/users/${Number(id)}/status`, {
-      status_aktif: false,
-    });
-    await userService.syncFromBackend();
-    return true;
+    try {
+      await api.patch(`/users/${Number(id)}/status`, {
+        status_aktif: false,
+      });
+      await userService.syncFromBackend();
+      return true;
+    } catch (err) {
+      if (err.status) {
+        throw err;
+      }
+      // Fallback update lokal bila server sedang offline
+      const current = userService.getUsers().map((u) => {
+        if (String(u.id) === String(id) || String(u.id_user) === String(id)) {
+          return { ...u, status_aktif: false };
+        }
+        return u;
+      });
+      userService.saveUsers(current);
+      return true;
+    }
   },
 };
 

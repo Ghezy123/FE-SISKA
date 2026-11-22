@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './StokModals.css';
 
 /**
@@ -6,6 +6,18 @@ import './StokModals.css';
  * Icon: red trash, title "Yakin Hapus Barang?", desc with product name
  */
 const ModalKonfirmasiHapus = ({ product, onClose, onHapus }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirm = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await onHapus(product);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-dialog modal-dialog-sm" onClick={(e) => e.stopPropagation()}>
@@ -27,18 +39,19 @@ const ModalKonfirmasiHapus = ({ product, onClose, onHapus }) => {
         {/* Footer */}
         <div className="modal-footer modal-footer-center" style={{ paddingTop: 16 }}>
           <div className="update-choice-group">
-            <button className="btn-batal" style={{ flex: 1 }} onClick={onClose}>Batal</button>
+            <button className="btn-batal" style={{ flex: 1 }} onClick={onClose} disabled={isDeleting}>Batal</button>
             <button
               className="btn-hapus-confirm"
-              style={{ flex: 1, justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: 8 }}
-              onClick={() => onHapus(product)}
+              style={{ flex: 1, justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: 8, opacity: isDeleting ? 0.7 : 1 }}
+              onClick={handleConfirm}
+              disabled={isDeleting}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
                 <path d="M10 11v6" /><path d="M14 11v6" />
               </svg>
-              Hapus
+              {isDeleting ? 'Menghapus...' : 'Hapus'}
             </button>
           </div>
         </div>

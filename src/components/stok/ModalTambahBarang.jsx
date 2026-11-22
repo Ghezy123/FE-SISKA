@@ -7,6 +7,7 @@ const CATEGORIES = ['Kertas', 'Alat Tulis', 'Buku', 'Arsip', 'Perekat', 'Lainnya
 
 const ModalTambahBarang = ({ onClose, onSave }) => {
   const { warning } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     nama: '',
     hargaBeli: '',
@@ -82,8 +83,9 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
     return form.satuan || 'Pcs';
   }, [inputStokTier, hasTier2, hasTier3, tier2.nama, tier3.nama, form.satuan]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     const namaTrimmed = form.nama.trim();
     if (!namaTrimmed) {
       warning('Nama barang tidak boleh kosong');
@@ -139,17 +141,22 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
       });
     }
 
-    onSave({
-      ...form,
-      nama: namaTrimmed,
-      hargaBeli: Math.max(0, Number(form.hargaBeli) || 0),
-      harga: hargaJualEcer,
-      satuan: satuanBase,
-      stok: totalPhysicalStock,
-      stok_minimal: Math.max(0, Number(form.stok_minimal) || 5),
-      kode: form.kode.trim() || undefined,
-      satuan_opsi: satuanOpsi,
-    });
+    setIsSubmitting(true);
+    try {
+      await onSave({
+        ...form,
+        nama: namaTrimmed,
+        hargaBeli: Math.max(0, Number(form.hargaBeli) || 0),
+        harga: hargaJualEcer,
+        satuan: satuanBase,
+        stok: totalPhysicalStock,
+        stok_minimal: Math.max(0, Number(form.stok_minimal) || 5),
+        kode: form.kode.trim() || undefined,
+        satuan_opsi: satuanOpsi,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -415,12 +422,12 @@ const ModalTambahBarang = ({ onClose, onSave }) => {
 
           {/* Footer */}
           <div className="modal-footer">
-            <button type="button" className="btn-batal" onClick={handleRequestClose}>Batal</button>
-            <button type="submit" className="btn-simpan">
+            <button type="button" className="btn-batal" onClick={handleRequestClose} disabled={isSubmitting}>Batal</button>
+            <button type="submit" className="btn-simpan" disabled={isSubmitting}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              Simpan Barang
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Barang'}
             </button>
           </div>
         </form>

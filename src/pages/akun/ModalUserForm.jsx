@@ -3,6 +3,7 @@ import { useToast } from '../../context/ToastContext';
 
 export const ModalUserForm = ({ isOpen, onClose, onSave, initialData }) => {
   const { warning } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEdit = Boolean(initialData);
 
   const [nama, setNama] = useState('');
@@ -26,7 +27,7 @@ export const ModalUserForm = ({ isOpen, onClose, onSave, initialData }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const cleanNama = nama.trim();
@@ -52,15 +53,20 @@ export const ModalUserForm = ({ isOpen, onClose, onSave, initialData }) => {
       return;
     }
 
-    onSave({
-      id: initialData?.id,
-      nama: cleanNama,
-      username: cleanUsername,
-      password: password.trim() || undefined,
-      role,
-    });
-
-    onClose();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onSave({
+        id: initialData?.id,
+        nama: cleanNama,
+        username: cleanUsername,
+        password: password.trim() || undefined,
+        role,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -153,14 +159,14 @@ export const ModalUserForm = ({ isOpen, onClose, onSave, initialData }) => {
 
           {/* Footer */}
           <div className="siska-user-modal-footer">
-            <button type="button" className="siska-btn-modal-cancel" onClick={onClose}>
+            <button type="button" className="siska-btn-modal-cancel" onClick={onClose} disabled={isSubmitting}>
               Batal
             </button>
-            <button type="submit" className="siska-btn-modal-primary">
+            <button type="submit" className="siska-btn-modal-primary" disabled={isSubmitting}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span>Simpan</span>
+              <span>{isSubmitting ? 'Menyimpan...' : 'Simpan'}</span>
             </button>
           </div>
         </form>

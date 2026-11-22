@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export const ModalKonfirmasiHapusUser = ({ isOpen, onClose, onConfirm, user }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
   if (!isOpen || !user) return null;
+
+  const handleConfirm = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await onConfirm(user);
+      onClose();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="siska-modal-backdrop" onClick={onClose}>
@@ -22,18 +34,17 @@ export const ModalKonfirmasiHapusUser = ({ isOpen, onClose, onConfirm, user }) =
         </p>
 
         <div className="siska-delete-actions">
-          <button type="button" className="siska-btn-modal-cancel" onClick={onClose}>
+          <button type="button" className="siska-btn-modal-cancel" onClick={onClose} disabled={isDeleting}>
             Batal
           </button>
           <button
             type="button"
             className="siska-btn-modal-danger"
-            onClick={() => {
-              onConfirm(user);
-              onClose();
-            }}
+            disabled={isDeleting}
+            style={{ opacity: isDeleting ? 0.7 : 1 }}
+            onClick={handleConfirm}
           >
-            Hapus
+            {isDeleting ? 'Menghapus...' : 'Hapus'}
           </button>
         </div>
       </div>

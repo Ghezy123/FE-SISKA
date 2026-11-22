@@ -12,6 +12,7 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
   const [selectedUnitIdx, setSelectedUnitIdx] = useState(0);
   const [confirmStep, setConfirmStep] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Ambil opsi satuan yang dimiliki barang (Tier 1 Ecer, Tier 2 Sedang, Tier 3 Grosir)
   const availableUnits = useMemo(() => {
@@ -57,9 +58,15 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
     setConfirmStep(true);
   };
 
-  const handleSave = () => {
-    const catatan = `Restok +${qtyInput} ${tierName} (${physicalAdded} ${product.satuan || 'unit'})`;
-    onSave(product, physicalAdded, catatan);
+  const handleSave = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const catatan = `Restok +${qtyInput} ${tierName} (${physicalAdded} ${product.satuan || 'unit'})`;
+      await onSave(product, physicalAdded, catatan);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (confirmStep) {
@@ -80,12 +87,12 @@ const ModalUpdateStok = ({ product, onClose, onSave }) => {
           </div>
           <div className="modal-footer modal-footer-center">
             <div className="update-choice-group">
-              <button className="btn-batal" style={{ flex: 1 }} onClick={() => setConfirmStep(false)}>Batal</button>
-              <button className="btn-simpan" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSave}>
+              <button className="btn-batal" style={{ flex: 1 }} onClick={() => setConfirmStep(false)} disabled={isSubmitting}>Batal</button>
+              <button className="btn-simpan" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSave} disabled={isSubmitting}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Simpan
+                {isSubmitting ? 'Menyimpan...' : 'Simpan'}
               </button>
             </div>
           </div>

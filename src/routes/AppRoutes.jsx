@@ -26,6 +26,7 @@ export const AppRoutes = () => {
   const [uangDiterima, setUangDiterima] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [lastTransaction, setLastTransaction] = useState(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   if (loading) {
     return (
@@ -55,6 +56,8 @@ export const AppRoutes = () => {
   const kembalian = Math.max(0, cashReceivedNumber - totalAmount);
 
   const handleConfirmPayment = async () => {
+    if (isProcessingPayment) return;
+    setIsProcessingPayment(true);
     try {
       // Catat transaksi ke BE-SISKA (otomatis memvalidasi & mengurangi stok secara atomik)
       const tx = await transaksiService.tambah(
@@ -69,6 +72,8 @@ export const AppRoutes = () => {
       setPaymentSuccess(true);
     } catch (err) {
       toastError(err.message || 'Gagal memproses pembayaran transaksi');
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -340,22 +345,22 @@ export const AppRoutes = () => {
                   </button>
                   <button
                     type="button"
-                    disabled={cashReceivedNumber < totalAmount}
+                    disabled={cashReceivedNumber < totalAmount || isProcessingPayment}
                     onClick={handleConfirmPayment}
                     style={{
                       flex: 2,
                       height: '46px',
                       borderRadius: '10px',
                       border: 'none',
-                      background: cashReceivedNumber < totalAmount ? '#94a3b8' : '#2563eb',
+                      background: cashReceivedNumber < totalAmount || isProcessingPayment ? '#94a3b8' : '#2563eb',
                       color: '#fff',
                       fontSize: '14px',
                       fontWeight: '700',
-                      cursor: cashReceivedNumber < totalAmount ? 'not-allowed' : 'pointer',
+                      cursor: cashReceivedNumber < totalAmount || isProcessingPayment ? 'not-allowed' : 'pointer',
                       boxShadow: '0 4px 12px rgba(37,99,235,0.25)',
                     }}
                   >
-                    Selesaikan Transaksi
+                    {isProcessingPayment ? 'Memproses Transaksi...' : 'Selesaikan Transaksi'}
                   </button>
                 </div>
               </>

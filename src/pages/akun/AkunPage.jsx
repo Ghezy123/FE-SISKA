@@ -32,9 +32,11 @@ export const AkunPage = () => {
   }, []);
 
   const filteredUsers = useMemo(() => {
+    // Opsi A: Hanya tampilkan akun pengguna yang aktif (status_aktif !== false)
+    const activeUsers = users.filter((u) => u.status_aktif !== false);
     const q = search.toLowerCase().trim();
-    if (!q) return users;
-    return users.filter(
+    if (!q) return activeUsers;
+    return activeUsers.filter(
       (u) =>
         (u.nama && u.nama.toLowerCase().includes(q)) ||
         (u.username && u.username.toLowerCase().includes(q)) ||

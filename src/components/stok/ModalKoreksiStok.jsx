@@ -13,6 +13,7 @@ const ModalKoreksiStok = ({ product, onClose, onSave }) => {
   const [alasanKategori, setAlasanKategori] = useState('Salah input data sebelumnya');
   const [catatanKhusus, setCatatanKhusus] = useState('');
   const [confirmStep, setConfirmStep] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const stokSaatIni = Number(product?.stok ?? 0);
   const stokBaru = stokFisik === '' ? 0 : Number(stokFisik);
@@ -40,12 +41,18 @@ const ModalKoreksiStok = ({ product, onClose, onSave }) => {
     setConfirmStep(true);
   };
 
-  const handleSave = () => {
-    const finalCatatan = catatanKhusus.trim()
-      ? `[${alasanKategori}] ${catatanKhusus.trim()} (Koreksi dari ${stokSaatIni} ke ${stokBaru} ${satuan})`
-      : `[${alasanKategori}] Koreksi dari ${stokSaatIni} ke ${stokBaru} ${satuan}`;
+  const handleSave = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const finalCatatan = catatanKhusus.trim()
+        ? `[${alasanKategori}] ${catatanKhusus.trim()} (Koreksi dari ${stokSaatIni} ke ${stokBaru} ${satuan})`
+        : `[${alasanKategori}] Koreksi dari ${stokSaatIni} ke ${stokBaru} ${satuan}`;
 
-    onSave(product, selisih, finalCatatan);
+      await onSave(product, selisih, finalCatatan);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (confirmStep) {
@@ -100,23 +107,25 @@ const ModalKoreksiStok = ({ product, onClose, onSave }) => {
           </div>
           <div className="modal-footer modal-footer-center">
             <div className="update-choice-group">
-              <button type="button" className="btn-batal" style={{ flex: 1 }} onClick={() => setConfirmStep(false)}>
+              <button type="button" className="btn-batal" style={{ flex: 1 }} onClick={() => setConfirmStep(false)} disabled={isSubmitting}>
                 Kembali
               </button>
               <button
                 type="button"
                 className="btn-simpan"
+                disabled={isSubmitting}
                 style={{
                   flex: 1,
                   justifyContent: 'center',
                   background: selisih < 0 ? '#dc2626' : '#2563eb',
+                  opacity: isSubmitting ? 0.7 : 1,
                 }}
                 onClick={handleSave}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Ya, Koreksi
+                {isSubmitting ? 'Mengoreksi...' : 'Ya, Koreksi'}
               </button>
             </div>
           </div>

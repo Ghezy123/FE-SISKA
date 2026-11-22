@@ -26,6 +26,7 @@ const StokPage = () => {
   const [modalUpdateStok, setModalUpdateStok] = useState(null);
   const [modalKoreksiStok, setModalKoreksiStok] = useState(null);
   const [modalHapus, setModalHapus] = useState(null);
+  const [isMutating, setIsMutating] = useState(false);
 
   const refresh = () => {
     setProducts(productService.getProducts());
@@ -59,6 +60,8 @@ const StokPage = () => {
 
   /* ──────────── CRUD handlers ──────────── */
   const handleSaveTambah = async (newProduct) => {
+    if (isMutating) return;
+    setIsMutating(true);
     try {
       await productService.tambahBarang(newProduct, 'Admin Toko');
       setModalTambah(false);
@@ -66,10 +69,14 @@ const StokPage = () => {
       success('Barang baru berhasil disimpan');
     } catch (err) {
       toastError(err.message || 'Gagal menambah barang baru');
+    } finally {
+      setIsMutating(false);
     }
   };
 
   const handleSaveHarga = async (updatedProduct) => {
+    if (isMutating) return;
+    setIsMutating(true);
     try {
       await productService.updateBarang(updatedProduct);
       setModalUpdateHarga(null);
@@ -77,10 +84,14 @@ const StokPage = () => {
       success('Harga barang berhasil diperbarui');
     } catch (err) {
       toastError(err.message || 'Gagal memperbarui harga barang');
+    } finally {
+      setIsMutating(false);
     }
   };
 
   const handleSaveStok = async (product, tambahQty, catatan) => {
+    if (isMutating) return;
+    setIsMutating(true);
     try {
       await productService.restokBarang(product.id, tambahQty, 'Admin Toko', catatan);
       setModalUpdateStok(null);
@@ -88,10 +99,14 @@ const StokPage = () => {
       success(`Stok ${product.nama} berhasil ditambahkan (+${tambahQty})`);
     } catch (err) {
       toastError(err.message || 'Gagal menambah stok barang');
+    } finally {
+      setIsMutating(false);
     }
   };
 
   const handleSaveKoreksiStok = async (product, selisih, catatan) => {
+    if (isMutating) return;
+    setIsMutating(true);
     try {
       await productService.koreksiStokBarang(product.id, selisih, catatan);
       setModalKoreksiStok(null);
@@ -100,10 +115,14 @@ const StokPage = () => {
       success(`Stok ${product.nama} berhasil dikoreksi (${tanda}${selisih})`);
     } catch (err) {
       toastError(err.message || 'Gagal mengoreksi stok barang');
+    } finally {
+      setIsMutating(false);
     }
   };
 
   const handleHapus = async (product) => {
+    if (isMutating) return;
+    setIsMutating(true);
     try {
       await productService.hapusBarang(product.id);
       setModalHapus(null);
@@ -111,6 +130,8 @@ const StokPage = () => {
       success(`Barang "${product.nama}" berhasil dihapus`);
     } catch (err) {
       toastError(err.message || 'Gagal menghapus barang');
+    } finally {
+      setIsMutating(false);
     }
   };
 

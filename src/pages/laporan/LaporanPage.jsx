@@ -35,6 +35,7 @@ const LaporanPage = () => {
   const [detailTx, setDetailTx] = useState(null);
   const [showVoidInput, setShowVoidInput] = useState(false);
   const [voidReason, setVoidReason] = useState('');
+  const [isVoidProcessing, setIsVoidProcessing] = useState(false);
 
   const refresh = () => {
     setSemua(transaksiService.getAll());
@@ -214,7 +215,8 @@ const LaporanPage = () => {
   };
 
   const handleConfirmVoid = async () => {
-    if (!detailTx) return;
+    if (!detailTx || isVoidProcessing) return;
+    setIsVoidProcessing(true);
     try {
       const updated = await transaksiService.voidTransaksi(detailTx, voidReason);
       setDetailTx(updated);
@@ -224,6 +226,8 @@ const LaporanPage = () => {
       success(`Transaksi ${detailTx.id} berhasil dibatalkan (VOID) dan stok telah dikembalikan`);
     } catch (err) {
       toastError(err.message || 'Gagal membatalkan transaksi');
+    } finally {
+      setIsVoidProcessing(false);
     }
   };
 
@@ -592,10 +596,11 @@ const LaporanPage = () => {
                     </button>
                     <button
                       type="button"
+                      disabled={isVoidProcessing}
                       onClick={handleConfirmVoid}
-                      style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: '#dc2626', color: '#fff', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                      style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: '#dc2626', color: '#fff', fontSize: '12px', fontWeight: '700', cursor: isVoidProcessing ? 'not-allowed' : 'pointer', opacity: isVoidProcessing ? 0.7 : 1 }}
                     >
-                      Konfirmasi Void &amp; Kembalikan Stok
+                      {isVoidProcessing ? 'Memproses...' : 'Konfirmasi Void & Kembalikan Stok'}
                     </button>
                   </div>
                 </div>

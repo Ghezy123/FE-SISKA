@@ -11,6 +11,7 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
   const [satuan, setSatuan] = useState(product.satuan || 'Pcs');
   const [confirmStep, setConfirmStep] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Cari Tier 2 & Tier 3 yang sudah tersimpan
   const existingTier2 = product.satuan_opsi?.find((opt) => (opt.tier === 2) || (opt.pengali > 1 && opt.pengali < 1000));
@@ -71,54 +72,60 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
     setConfirmStep(true);
   };
 
-  const handleSave = () => {
-    const newHargaEcer = Number(harga);
-    const satuanBase = satuan.trim() || product.satuan || 'Pcs';
+  const handleSave = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const newHargaEcer = Number(harga);
+      const satuanBase = satuan.trim() || product.satuan || 'Pcs';
 
-    const updatedSatuanOpsi = [
-      {
-        tier: 1,
-        nama: satuanBase,
-        namaSatuan: satuanBase,
-        pengali: 1,
+      const updatedSatuanOpsi = [
+        {
+          tier: 1,
+          nama: satuanBase,
+          namaSatuan: satuanBase,
+          pengali: 1,
+          harga: newHargaEcer,
+          label: `Ecer (${satuanBase})`,
+        },
+      ];
+
+      if (hasTier2 && Number(tier2.pengali) > 1 && Number(tier2.harga) > 0) {
+        const t2Name = tier2.nama.trim() || 'Pack';
+        const mult2 = Number(tier2.pengali);
+        updatedSatuanOpsi.push({
+          tier: 2,
+          nama: `${t2Name} (${mult2} ${satuanBase})`,
+          namaSatuan: t2Name,
+          pengali: mult2,
+          harga: Number(tier2.harga),
+          label: `${t2Name} (isi ${mult2} ${satuanBase})`,
+        });
+      }
+
+      if (hasTier3 && Number(tier3.pengali) > 1 && Number(tier3.harga) > 0) {
+        const t3Name = tier3.nama.trim() || 'Box';
+        const mult3 = Number(tier3.pengali);
+        updatedSatuanOpsi.push({
+          tier: 3,
+          nama: `${t3Name} (${mult3} ${satuanBase})`,
+          namaSatuan: t3Name,
+          pengali: mult3,
+          harga: Number(tier3.harga),
+          label: `${t3Name} (isi ${mult3} ${satuanBase})`,
+        });
+      }
+
+      await onSave({
+        ...product,
+        satuan: satuanBase,
+        hargaBeli: Number(hargaBeli),
         harga: newHargaEcer,
-        label: `Ecer (${satuanBase})`,
-      },
-    ];
-
-    if (hasTier2 && Number(tier2.pengali) > 1 && Number(tier2.harga) > 0) {
-      const t2Name = tier2.nama.trim() || 'Pack';
-      const mult2 = Number(tier2.pengali);
-      updatedSatuanOpsi.push({
-        tier: 2,
-        nama: `${t2Name} (${mult2} ${satuanBase})`,
-        namaSatuan: t2Name,
-        pengali: mult2,
-        harga: Number(tier2.harga),
-        label: `${t2Name} (isi ${mult2} ${satuanBase})`,
+        satuan_opsi: updatedSatuanOpsi,
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (hasTier3 && Number(tier3.pengali) > 1 && Number(tier3.harga) > 0) {
-      const t3Name = tier3.nama.trim() || 'Box';
-      const mult3 = Number(tier3.pengali);
-      updatedSatuanOpsi.push({
-        tier: 3,
-        nama: `${t3Name} (${mult3} ${satuanBase})`,
-        namaSatuan: t3Name,
-        pengali: mult3,
-        harga: Number(tier3.harga),
-        label: `${t3Name} (isi ${mult3} ${satuanBase})`,
-      });
-    }
-
-    onSave({
-      ...product,
-      satuan: satuanBase,
-      hargaBeli: Number(hargaBeli),
-      harga: newHargaEcer,
-      satuan_opsi: updatedSatuanOpsi,
-    });
   };
 
   if (confirmStep) {
@@ -138,12 +145,12 @@ const ModalUpdateHarga = ({ product, onClose, onSave }) => {
           </div>
           <div className="modal-footer modal-footer-center">
             <div className="update-choice-group">
-              <button className="btn-batal" style={{ flex: 1 }} onClick={() => setConfirmStep(false)}>Batal</button>
-              <button className="btn-simpan" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSave}>
+              <button className="btn-batal" style={{ flex: 1 }} onClick={() => setConfirmStep(false)} disabled={isSubmitting}>Batal</button>
+              <button className="btn-simpan" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSave} disabled={isSubmitting}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Simpan
+                {isSubmitting ? 'Menyimpan...' : 'Simpan'}
               </button>
             </div>
           </div>
